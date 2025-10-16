@@ -88,7 +88,7 @@ const App = () => {
                 <h1 className="text-xl font-bold text-white tracking-wider">AI-CertiAuth</h1>
                 <div className="space-x-6 hidden sm:flex">
                     <a className="text-gray-200 hover:text-white transition duration-200"><Link to={"/about"}>About</Link></a>
-                    <a className="text-gray-200 hover:text-white transition duration-200"><Link to={"/"}>Features</Link></a>
+                    <a className="text-gray-200 hover:text-white transition duration-200"><Link to={"/feature"}>Features</Link></a>
                     <a className="text-gray-200 hover:text-white transition duration-200"><Link to={"/"}>Contact</Link></a>
                     <a className="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-600 shadow-md transition duration-200">
                         <Link to={"/login"}>Login/Register</Link>
@@ -99,7 +99,7 @@ const App = () => {
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                 </button>
             </nav>
-            <div className="pt-16"></div> {/* Offset for fixed navbar */}
+            <div className="pt-16"></div>
             
             <section id="about" className="text-center py-20 px-6 bg-white max-w-7xl mx-auto rounded-xl shadow-inner my-8 animate-fade-in" style={{'--delay': '0ms'}}>
                 <div className="flex justify-center items-center mb-4">
@@ -131,7 +131,7 @@ const App = () => {
                         <FeatureCard 
                             key={index} 
                             {...feature} 
-                            delay={200 + index * 200} // Staggered animation
+                            delay={200 + index * 200} 
                         />
                     ))}
                 </div>
