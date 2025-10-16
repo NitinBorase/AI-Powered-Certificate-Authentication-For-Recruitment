@@ -32,7 +32,7 @@ const initialCertificates = [
     actionRequired: 'Please Verify Certificate',
   },
 ];
-
+//Comment
 const getStatusInfo = (status) => {
   switch (status) {
     case 'Verified':
