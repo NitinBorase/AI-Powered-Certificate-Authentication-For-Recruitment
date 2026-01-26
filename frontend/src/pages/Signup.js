@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, Building, Landmark, LogIn, Key, Briefcase, Hash } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const Header = () => (
     <header className="bg-blue-800 text-white shadow-lg p-4 sticky top-0 z-10">
@@ -91,23 +92,27 @@ const ApplicantForm = ({ setLoading, setMessage, loading }) => {
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        if (formData.password !== formData.confirmPassword) {
+            return setMessage('Error: Passwords do not match.');
+        }
         setMessage('');
         setLoading(true);
 
-        setTimeout(() => {
+        try{
+            const response = await axios.post('http://localhost:5000/api/auth/register', {
+                ...formData,
+                role: 'Applicant'
+            });
+            setMessage(response.data.message || 'Registration successfull');
+        }
+        catch(err){
+            setMessage(err.response?.data?.message || 'Error occured during registration.');
+        }
+        finally{
             setLoading(false);
-            if (formData.password !== formData.confirmPassword) {
-                setMessage('Error: Passwords do not match.');
-            } else if (formData.email && formData.password) {
-                // Simulated successful registration
-                setMessage('Applicant Registration successful! Proceed to login.');
-                console.log('Applicant Registration Data:', formData);
-            } else {
-                setMessage('Please fill in all required fields.');
-            }
-        }, 1500);
+        }
     };
 
     return (
@@ -121,27 +126,31 @@ const ApplicantForm = ({ setLoading, setMessage, loading }) => {
 };
 
 const EmployerForm = ({ setLoading, setMessage, loading }) => {
-    const [formData, setFormData] = useState({ orgName: '', email: '', password: '', confirmPassword: '' });
+    const [formData, setFormData] = useState({ companyName: '', email: '', password: '', confirmPassword: '' });
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        if (formData.password !== formData.confirmPassword) {
+            return setMessage('Error: Passwords do not match.');
+        }
         setMessage('');
         setLoading(true);
 
-        setTimeout(() => {
+        try{
+            const response = await axios.post('http://localhost:5000/api/auth/register', {
+                ...formData,
+                role: 'Employer',
+            });
+            setMessage(response.data.message || 'Registration successfull');
+        }
+        catch(err){
+            setMessage(err.response?.data?.message || 'Error occured during registration.');
+        }
+        finally{
             setLoading(false);
-            if (formData.password !== formData.confirmPassword) {
-                setMessage('Error: Passwords do not match.');
-            } else if (formData.email && formData.password && formData.orgName) {
-                // Simulated successful registration
-                setMessage('Employer Registration successful! Proceed to login.');
-                console.log('Employer Registration Data:', formData);
-            } else {
-                setMessage('Please fill in all required fields.');
-            }
-        }, 1500);
+        }
     };
 
     return (
@@ -156,27 +165,31 @@ const EmployerForm = ({ setLoading, setMessage, loading }) => {
 };
 
 const InstitutionForm = ({ setLoading, setMessage, loading }) => {
-    const [formData, setFormData] = useState({ instName: '', email: '', password: '', confirmPassword: '' });
+    const [formData, setFormData] = useState({ institutionName: '', email: '', password: '', confirmPassword: '' });
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        if (formData.password !== formData.confirmPassword) {
+            return setMessage('Error: Passwords do not match.');
+        }
         setMessage('');
         setLoading(true);
 
-        setTimeout(() => {
+        try{
+            const response = await axios.post('http://localhost:5000/api/auth/register', {
+                ...formData,
+                role: 'Institution',
+            });
+            setMessage(response.data.message || 'Registration successfull');
+        }
+        catch(err){
+            setMessage(err.response?.data?.message || 'Error occured during registration.');
+        }
+        finally{
             setLoading(false);
-            if (formData.password !== formData.confirmPassword) {
-                setMessage('Error: Passwords do not match.');
-            } else if (formData.email && formData.password && formData.instName) {
-                // Simulated successful registration
-                setMessage('Institution Registration successful! Proceed to login.');
-                console.log('Institution Registration Data:', formData);
-            } else {
-                setMessage('Please fill in all required fields.');
-            }
-        }, 1500);
+        }
     };
 
     return (

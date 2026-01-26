@@ -1,9 +1,9 @@
-const moongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-const InstitutionSchema = new moongoose.Schema({
+const InstitutionSchema = new mongoose.Schema({
     institutionName : String,
     email : String,
     password : String
 });
 
-module.exports = moongoose.model('Institution', InstitutionSchema);
+module.exports = mongoose.model('Institution', InstitutionSchema);

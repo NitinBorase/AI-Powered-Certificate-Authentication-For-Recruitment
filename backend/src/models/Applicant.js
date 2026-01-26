@@ -1,8 +1,8 @@
-const moongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-const ApplicantSchema = new moongoose.Schema({
+const ApplicantSchema = new mongoose.Schema({
     email : String,
     password : String
 });
 
-module.exports = moongoose.model('Applicant', ApplicantSchema);
+module.exports = mongoose.model('Applicant', ApplicantSchema);

@@ -1,9 +1,9 @@
-const moongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-const EmployerSchema = new moongoose.Schema({
+const EmployerSchema = new mongoose.Schema({
     companyName : String,
     email : String,
     password : String
 });
 
-module.exports = moongoose.model('Employer', EmployerSchema);
+module.exports = mongoose.model('Employer', EmployerSchema);

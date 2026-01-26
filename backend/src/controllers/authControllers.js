@@ -1,4 +1,4 @@
-const bycrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs');
 const Applicant = require('../models/Applicant');
 const Employer = require('../models/Employer');
 const Institution = require('../models/Institution');
@@ -11,7 +11,7 @@ exports.registerUser = async(req, res) => {
             return res.status(400).json({ message: 'Please provide all required fields' });
         }
 
-        const hashedPassword = await bycrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         let newUser;
 
@@ -25,6 +25,7 @@ exports.registerUser = async(req, res) => {
             return res.status(400).json({ message: 'Invalid role specified' });
         }
         await newUser.save();
+
         res.status(201).json({ message: `${role} User registered successfully` });
     }
     catch(err){
