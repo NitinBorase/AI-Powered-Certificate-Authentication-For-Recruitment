@@ -73,9 +73,9 @@ const App = () => {
       <header className="flex items-center justify-between px-6 py-4 bg-blue-900 text-white shadow-xl sticky top-0 z-10">
         <h1 className="text-2xl font-extrabold tracking-wider">{organizationName}</h1>
         <nav className="flex items-center space-x-6">
-          <a className="text-gray-300 hover:text-white transition hidden sm:inline"><Link to={"/about"}>About</Link></a>
+          {/* <a className="text-gray-300 hover:text-white transition hidden sm:inline"><Link to={"/about"}>About</Link></a>
           <a className="text-gray-300 hover:text-white transition hidden sm:inline"><Link to={"/feature"}>Features</Link></a>
-          <a className="text-gray-300 hover:text-white transition hidden sm:inline"><Link to={"/"}>Contact</Link></a>
+          <a className="text-gray-300 hover:text-white transition hidden sm:inline"><Link to={"/"}>Contact</Link></a> */}
           
           <div className="flex items-center space-x-4 border-l border-gray-700 pl-4">
             <span className="text-sm font-medium hidden md:inline">Profile</span>

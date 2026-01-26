@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Mail, Lock, LogIn, User, Building, Landmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => (
     <header className="bg-blue-800 text-white shadow-lg p-4">
@@ -56,26 +57,40 @@ const RoleSelector = ({ role, setRole }) => {
 
 
 const LoginForm = () => {
+    const navigate = useNavigate();
     const [role, setRole] = useState('Institution'); 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setMessage('');
         setLoading(true);
 
-        setTimeout(() => {
-            setLoading(false);
-            if (email && password) {
-                setMessage(`Mock Login successful for ${role}!`);
-                console.log(`Logging in as ${role} with email: ${email}`);
-            } else {
-                setMessage('Please enter both email and password.');
+        try{
+            const response = await axios.post('http://localhost:5000/api/auth/login', {
+                email,
+                password,
+                role
+            });
+            setMessage(response.data.message || 'Login successful');
+            if(response.status === 200){
+                if(role === 'Applicant'){
+                    navigate("/applicantPage");
+                }else if(role === 'Employer'){
+                    navigate("/employerPage");
+                }else if(role === 'Institution'){
+                    navigate("/institutePage");
+                }
             }
-        }, 1500);
+        }
+        catch(err){
+            setMessage(err.response?.data?.message || 'Login failed. Please try again.');
+        }
+        finally{
+            setLoading(false);
+        }
     };
 
     return (
