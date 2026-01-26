@@ -7,6 +7,16 @@ exports.registerUser = async(req, res) => {
     try{
         const { email, password, role, institutionName, companyName } =  req.body;
 
+        const existingApplicant = await Applicant.findOne({ email });
+        const existingEmployer = await Employer.findOne({ email });
+        const existingInstitution = await Institution.findOne({ email });
+
+        if (existingApplicant || existingEmployer || existingInstitution) {
+            return res.status(400).json({ 
+                message: "Email is already registered. Please login instead." 
+            });
+        }
+
         if(!email || !password || !role){
             return res.status(400).json({ message: 'Please provide all required fields' });
         }
@@ -24,11 +34,13 @@ exports.registerUser = async(req, res) => {
         } else{
             return res.status(400).json({ message: 'Invalid role specified' });
         }
+
         await newUser.save();
 
         res.status(201).json({ message: `${role} User registered successfully` });
     }
     catch(err){
+        console.error(err);
         res.status(500).json({ message: 'Server Error', error: err.message });
     }
 };

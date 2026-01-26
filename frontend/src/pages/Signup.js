@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, Building, Landmark, LogIn, Key, Briefcase, Hash } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Header = () => (
@@ -88,6 +88,8 @@ const FormButton = ({ loading }) => (
 );
 
 const ApplicantForm = ({ setLoading, setMessage, loading }) => {
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({ email: '', password: '', confirmPassword: '' });
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -106,6 +108,9 @@ const ApplicantForm = ({ setLoading, setMessage, loading }) => {
                 role: 'Applicant'
             });
             setMessage(response.data.message || 'Registration successfull');
+            if(response.status === 201){
+                navigate("/applicantPage");
+            }
         }
         catch(err){
             setMessage(err.response?.data?.message || 'Error occured during registration.');
@@ -126,6 +131,8 @@ const ApplicantForm = ({ setLoading, setMessage, loading }) => {
 };
 
 const EmployerForm = ({ setLoading, setMessage, loading }) => {
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({ companyName: '', email: '', password: '', confirmPassword: '' });
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -144,6 +151,9 @@ const EmployerForm = ({ setLoading, setMessage, loading }) => {
                 role: 'Employer',
             });
             setMessage(response.data.message || 'Registration successfull');
+            if(response.status === 201){
+                navigate("/employerPage");
+            }
         }
         catch(err){
             setMessage(err.response?.data?.message || 'Error occured during registration.');
@@ -165,6 +175,8 @@ const EmployerForm = ({ setLoading, setMessage, loading }) => {
 };
 
 const InstitutionForm = ({ setLoading, setMessage, loading }) => {
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({ institutionName: '', email: '', password: '', confirmPassword: '' });
 
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -183,6 +195,9 @@ const InstitutionForm = ({ setLoading, setMessage, loading }) => {
                 role: 'Institution',
             });
             setMessage(response.data.message || 'Registration successfull');
+            if(response.status === 201){
+                navigate("/institutePage");
+            }
         }
         catch(err){
             setMessage(err.response?.data?.message || 'Error occured during registration.');
