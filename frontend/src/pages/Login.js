@@ -83,6 +83,8 @@ const LoginForm = () => {
                 }else if(role === 'Institution'){
                     navigate("/institutePage");
                 }
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('userEmail', response.data.userEmail);
             }
         }
         catch(err){

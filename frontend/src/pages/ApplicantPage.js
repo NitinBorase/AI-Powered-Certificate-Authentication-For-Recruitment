@@ -49,7 +49,8 @@ const getStatusInfo = (status) => {
 const App = () => {
   const [certificates, setCertificates] = useState(initialCertificates);
   const [currentResume, setCurrentResume] = useState('user_resume.pdf');
-  const userName = "User Name!";
+  const userEmail = localStorage.getItem('userEmail') || 'User Name!';
+  const userName = `${userEmail}`;
   const organizationName = "AI-CertiAuth";
 
   const handleResumeUpload = () => {

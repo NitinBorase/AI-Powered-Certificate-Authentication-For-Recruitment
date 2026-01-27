@@ -46,7 +46,8 @@ const getStatusInfo = (status) => {
 
 const App = () => {
   const [certificateData, setCertificateData] = useState(initialCertData);
-  const institutionName = "Institution Name!";
+  const institution = localStorage.getItem('userEmail') || 'User Name!';
+  const institutionName = `${institution}`;
   const organizationName = "AI-CertiAuth";
 
   const handleAddNewData = () => {

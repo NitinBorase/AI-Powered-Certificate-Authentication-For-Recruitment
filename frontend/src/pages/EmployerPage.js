@@ -62,7 +62,8 @@ const App = () => {
   const [jobPosts, setJobPosts] = useState(initialJobPosts);
   
   const organizationName = "AI-CertiAuth";
-  const companyName = "Your Organization or Company Name!";
+  const company = localStorage.getItem('userEmail') || 'User Name!';
+  const companyName = `${company}`;
 
   const handleAddNewPost = () => {
     const newId = `new${Date.now()}`;

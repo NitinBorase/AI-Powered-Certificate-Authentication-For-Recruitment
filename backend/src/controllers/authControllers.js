@@ -74,8 +74,10 @@ exports.loginUser = async(req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: '1d' }
         );
+        // console.log(`User ${email} logged in as ${role}`); // Debug log
 
-        res.status(200).json({ message: 'Login successful', token });
+        res.status(200).json({ message: 'Login successful', token, 
+            userEmail: user.email });
     }
     catch(err){
         console.error(err);
