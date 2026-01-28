@@ -15,6 +15,9 @@ app.use(express.json());
 const authRoutes = require('./src/routes/authRoutes');
 app.use('/api/auth', authRoutes);
 
+const fileRoutes = require('./src/routes/fileRoutes');
+app.use('/api/files', fileRoutes);
+
 app.get('/', (req, res) => {
   res.send('Backend is running');
 });

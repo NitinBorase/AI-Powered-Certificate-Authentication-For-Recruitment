@@ -85,6 +85,8 @@ const LoginForm = () => {
                 }
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('userEmail', response.data.userEmail);
+                localStorage.setItem('resumeUrl', response.data.resumeUrl || '');
+                localStorage.setItem('fileName', response.data.fileName || 'Not uploaded');
             }
         }
         catch(err){

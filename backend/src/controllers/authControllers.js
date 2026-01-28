@@ -77,7 +77,10 @@ exports.loginUser = async(req, res) => {
         // console.log(`User ${email} logged in as ${role}`); // Debug log
 
         res.status(200).json({ message: 'Login successful', token, 
-            userEmail: user.email });
+            userEmail: user.email,
+            resumeUrl: user.resumeUrl || null,
+            fileName: user.fileName || null
+        });
     }
     catch(err){
         console.error(err);

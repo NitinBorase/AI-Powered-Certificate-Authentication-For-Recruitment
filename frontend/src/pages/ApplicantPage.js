@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { UserCircle, Bell, Upload, FileText, CheckCircle, Clock, XCircle, AlertTriangle } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { UserCircle, Bell, Upload, FileText, CheckCircle, Clock, XCircle, AlertTriangle, FileInput } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+
 
 const initialCertificates = [
   {
@@ -48,14 +50,94 @@ const getStatusInfo = (status) => {
 
 const App = () => {
   const [certificates, setCertificates] = useState(initialCertificates);
-  const [currentResume, setCurrentResume] = useState('user_resume.pdf');
+  const [currentResume, setCurrentResume] = useState('Loading...');
+  const [resumeUrl, setResumeUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
   const userEmail = localStorage.getItem('userEmail') || 'User Name!';
   const userName = `${userEmail}`;
   const organizationName = "AI-CertiAuth";
 
+  useEffect(() => {
+        const fetchUserData = async () => {
+            const userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) return;
+
+            try {
+                const response = await axios.get(`http://localhost:5000/api/files/profile?email=${userEmail}`);
+                if (response.data.success && response.data.resumeUrl) {
+                    console.log("Fetched profile data:", response.data);
+                    setResumeUrl(response.data.resumeUrl);
+                    setCurrentResume(response.data.fileName); 
+                } else {
+                    setCurrentResume("No resume uploaded");
+                }
+            } catch (error) {
+                console.error("Error fetching profile:", error);
+                setCurrentResume("Error loading profile");
+            }
+        };
+
+        fetchUserData();
+    }, []);
+
+  const fileInputRef = useRef(null);
+
+  const uploadToCloud = async (file) => {
+    const formData = new FormData();
+    formData.append('resume', file);
+
+    setUploading(true);
+
+    try{
+      const response = await axios.post('http://localhost:5000/api/files/uploadResume', formData);
+
+      const resumeUrl = response.data.fileUrl;
+      const userEmail = localStorage.getItem('userEmail');
+
+      const dbResponse = await axios.post('http://localhost:5000/api/files/update-db', {
+        email: userEmail,
+        resumeUrl: resumeUrl,
+        fileName: file.name
+      });
+
+      if (dbResponse.data.success) {
+          setCurrentResume(file.name);
+          alert("Resume uploaded and saved to profile!");
+          console.log("Database updated with resume URL:", resumeUrl, dbResponse.data.user);
+      }
+
+      if(response.data.success){
+        setCurrentResume(file.name);
+        alert('Resume uploaded successfully!');
+        console.log('Resume uploaded successfully:', response.data.fileUrl);
+      }
+    }
+    catch(err){
+      console.error('Error uploading resume:', err);
+      alert('Failed to upload resume. Please try again.');
+    }
+    finally{
+      setUploading(false);
+    }
+  };
+
+  const handleFileChange = async(event) => {
+    const file = event.target.files[0];
+    if(!file) return;
+
+    if(file.type !== 'application/pdf'){
+      alert('Please upload a PDF file.');
+      return;
+    }
+    console.log('Uploading file:', file.name);
+
+    await uploadToCloud(file);
+
+    event.target.value = null;
+  }
+
   const handleResumeUpload = () => {
-    console.log("Opening file picker for resume upload...");
-    alert("Resume upload simulated. In a real app, this opens the file dialog.");
+    fileInputRef.current.click();
   };
 
   const handleCertificateUpload = () => {
@@ -95,6 +177,13 @@ const App = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           
           <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-200">
+          <input 
+            type = 'file'
+            ref = {fileInputRef}
+            onChange={handleFileChange}
+            className='hidden'
+            accept='.pdf'
+          />
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold text-gray-800 flex items-center">
                     <FileText className="w-6 h-6 mr-2 text-blue-600" />
