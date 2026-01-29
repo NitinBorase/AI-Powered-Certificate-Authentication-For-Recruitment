@@ -64,10 +64,10 @@ const App = () => {
 
             try {
                 const response = await axios.get(`http://localhost:5000/api/files/profile?email=${userEmail}`);
-                if (response.data.success && response.data.resumeUrl) {
+                if (response.data.success && response.data.user.resumeUrl) {
                     console.log("Fetched profile data:", response.data);
-                    setResumeUrl(response.data.resumeUrl);
-                    setCurrentResume(response.data.fileName); 
+                    setResumeUrl(response.data.user.resumeUrl);
+                    setCurrentResume(response.data.user.fileName); 
                 } else {
                     setCurrentResume("No resume uploaded");
                 }
@@ -102,7 +102,7 @@ const App = () => {
 
       if (dbResponse.data.success) {
           setCurrentResume(file.name);
-          alert("Resume uploaded and saved to profile!");
+          // alert("Resume uploaded and saved to profile!");
           console.log("Database updated with resume URL:", resumeUrl, dbResponse.data.user);
       }
 
@@ -198,7 +198,9 @@ const App = () => {
                 </button>
             </div>
             <p className="text-sm font-medium text-gray-600">Current Resume:</p>
+            <a href={resumeUrl} target="_blank" rel="noopener noreferrer">
             <p className="text-base font-semibold text-blue-700 underline truncate">{currentResume}</p>
+            </a>
           </div>
 
           <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-200">
