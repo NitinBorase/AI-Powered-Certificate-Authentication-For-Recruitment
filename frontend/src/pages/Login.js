@@ -69,7 +69,7 @@ const LoginForm = () => {
         setLoading(true);
 
         try{
-            const response = await axios.post('http://localhost:5000/api/auth/login', {
+            const response = await axios.post('https://ai-powered-certificate-authentication.onrender.com/api/auth/login', {
                 email,
                 password,
                 role
