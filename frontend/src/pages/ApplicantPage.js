@@ -63,7 +63,7 @@ const App = () => {
             if (!userEmail) return;
 
             try {
-                const response = await axios.get(`http://localhost:5000/api/files/profile?email=${userEmail}`);
+                const response = await axios.get(`https://ai-powered-certificate-authentication.onrender.com/api/files/profile?email=${userEmail}`);
                 if (response.data.success && response.data.user.resumeUrl) {
                     console.log("Fetched profile data:", response.data);
                     setResumeUrl(response.data.user.resumeUrl);
