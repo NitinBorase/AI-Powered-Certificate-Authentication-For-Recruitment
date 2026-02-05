@@ -4,36 +4,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 
-const initialCertificates = [
-  {
-    id: 'c001',
-    fileName: 'Java Certificate',
-    status: 'Verified',
-    uploadedDate: '19/09/2025',
-    actionRequired: 'No Action Required',
-  },
-  {
-    id: 'c002',
-    fileName: 'Power BI Certificate',
-    status: 'Pending',
-    uploadedDate: '02/10/2025',
-    actionRequired: 'No Action Required',
-  },
-  {
-    id: 'c003',
-    fileName: 'NPTEL',
-    status: 'Verified',
-    uploadedDate: '15/09/2025',
-    actionRequired: 'No Action Required',
-  },
-  {
-    id: 'c004',
-    fileName: 'Event Participation',
-    status: 'Not Verified',
-    uploadedDate: '20/08/2025',
-    actionRequired: 'Please Verify Certificate',
-  },
-];
+const initialCertificates = [];
 //Comment
 const getStatusInfo = (status) => {
   switch (status) {
@@ -53,6 +24,8 @@ const App = () => {
   const [currentResume, setCurrentResume] = useState('Loading...');
   const [resumeUrl, setResumeUrl] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [certUploading, setCertUploading] = useState(false);
+  const certFileInputRef = useRef(null);
   const userEmail = localStorage.getItem('userEmail') || 'User Name!';
   const userName = `${userEmail}`;
   const organizationName = "AI-CertiAuth";
@@ -60,14 +33,18 @@ const App = () => {
   useEffect(() => {
         const fetchUserData = async () => {
             const userEmail = localStorage.getItem('userEmail');
-            if (!userEmail) return;
+            if (!userEmail) {
+                console.log('No userEmail in localStorage; skipping profile fetch');
+                return;
+            }
 
             try {
                 const response = await axios.get(`http://localhost:5000/api/files/profile?email=${userEmail}`);
-                if (response.data.success && response.data.user.resumeUrl) {
+                if (response.data.success) {
                     console.log("Fetched profile data:", response.data);
-                    setResumeUrl(response.data.user.resumeUrl);
-                    setCurrentResume(response.data.user.fileName); 
+                    setResumeUrl(response.data.user.resumeUrl || '');
+                    setCurrentResume(response.data.user.fileName || 'No resume uploaded');
+                    setCertificates(response.data.user.certificates || []);
                 } else {
                     setCurrentResume("No resume uploaded");
                 }
@@ -78,6 +55,15 @@ const App = () => {
         };
 
         fetchUserData();
+
+        // Re-fetch if the user logs in from another tab (storage event)
+        const onStorage = (e) => {
+            if (e.key === 'userEmail') {
+                fetchUserData();
+            }
+        };
+        window.addEventListener('storage', onStorage);
+        return () => window.removeEventListener('storage', onStorage);
     }, []);
 
   const fileInputRef = useRef(null);
@@ -141,8 +127,51 @@ const App = () => {
   };
 
   const handleCertificateUpload = () => {
-    console.log("Opening file picker for certificate upload...");
-    alert("Certificate upload simulated. In a real app, this opens the file dialog.");
+    certFileInputRef.current && certFileInputRef.current.click();
+  };
+
+  const handleCertificateFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Please upload PDF, PNG, or JPG files only.');
+      event.target.value = null;
+      return;
+    }
+
+    setCertUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('certificate', file);
+
+      const uploadRes = await axios.post('http://localhost:5000/api/files/uploadCertificate', formData);
+      if (!uploadRes.data || !uploadRes.data.success) throw new Error(uploadRes.data?.message || 'Upload failed');
+
+      const certificateUrl = uploadRes.data.fileUrl;
+      const email = localStorage.getItem('userEmail');
+
+      const dbRes = await axios.post('http://localhost:5000/api/files/certificates/update-db', {
+        email,
+        certificateUrl,
+        fileName: file.name
+      });
+
+      if (dbRes.data && dbRes.data.success) {
+        const cert = dbRes.data.certificate;
+        setCertificates(prev => [cert, ...prev]);
+        alert('Certificate uploaded and marked as Pending.');
+      } else {
+        throw new Error(dbRes.data?.message || 'DB update failed');
+      }
+    } catch (err) {
+      console.error('Error uploading certificate:', err);
+      alert('Failed to upload certificate. Please try again. ' + (err.message || ''));
+    } finally {
+      setCertUploading(false);
+      event.target.value = null;
+    }
   };
 
   const handleVerifyAction = (certId, fileName) => {
@@ -156,9 +185,7 @@ const App = () => {
       <header className="flex items-center justify-between px-6 py-4 bg-blue-900 text-white shadow-xl sticky top-0 z-10">
         <h1 className="text-2xl font-extrabold tracking-wider">{organizationName}</h1>
         <nav className="flex items-center space-x-6">
-          {/* <a className="text-gray-300 hover:text-white transition hidden sm:inline"><Link to={"/about"}>About</Link></a>
-          <a className="text-gray-300 hover:text-white transition hidden sm:inline"><Link to={"/feature"}>Features</Link></a>
-          <a className="text-gray-300 hover:text-white transition hidden sm:inline"><Link to={"/"}>Contact</Link></a> */}
+          <Link to="/jobs" className="text-gray-300 hover:text-white transition hidden sm:inline">Search Jobs</Link>
           
           <div className="flex items-center space-x-4 border-l border-gray-700 pl-4">
             <span className="text-sm font-medium hidden md:inline">Profile</span>
@@ -173,6 +200,10 @@ const App = () => {
         <h2 className="mb-8 text-2xl font-light text-gray-700">
           Hii <span className="font-semibold text-gray-900">{userName}</span>
         </h2>
+
+        <div className="mb-6">
+          <Link to="/jobs" className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md">Search Jobs</Link>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           
@@ -208,6 +239,7 @@ const App = () => {
                 Add new certificate to your profile :
             </h3>
             <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                <input type="file" ref={certFileInputRef} onChange={handleCertificateFileChange} className='hidden' accept='.pdf,.jpg,.jpeg,.png' />
                 <input
                     type="text"
                     placeholder="Browse file..."
@@ -256,7 +288,13 @@ const App = () => {
                 return (
                   <tr key={cert.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {cert.fileName}
+                      {cert.url ? (
+                        <a href={cert.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">
+                          {cert.fileName}
+                        </a>
+                      ) : (
+                        cert.fileName
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full ${text} ${bgColor} border ${borderColor}`}>

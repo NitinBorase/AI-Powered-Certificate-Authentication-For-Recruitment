@@ -18,6 +18,10 @@ app.use('/api/auth', authRoutes);
 const fileRoutes = require('./src/routes/fileRoutes');
 app.use('/api/files', fileRoutes);
 
+// Jobs routes
+const jobRoutes = require('./src/routes/jobRoutes');
+app.use('/api/jobs', jobRoutes);
+
 app.get('/', (req, res) => {
   res.send('Backend is running');
 });

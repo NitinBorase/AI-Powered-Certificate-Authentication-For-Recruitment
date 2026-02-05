@@ -76,17 +76,24 @@ const LoginForm = () => {
             });
             setMessage(response.data.message || 'Login successful');
             if(response.status === 200){
-                if(role === 'Applicant'){
-                    navigate("/applicantPage");
-                }else if(role === 'Employer'){
-                    navigate("/employerPage");
-                }else if(role === 'Institution'){
-                    navigate("/institutePage");
-                }
+                // Save data to localStorage first so subsequent pages can read immediately
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('userEmail', response.data.userEmail);
                 localStorage.setItem('resumeUrl', response.data.resumeUrl || '');
                 localStorage.setItem('fileName', response.data.fileName || 'Not uploaded');
+
+                console.log('Login successful', { role, userEmail: response.data.userEmail, token: response.data.token });
+
+                if(role === 'Applicant'){
+                    console.log('Navigating to applicant dashboard');
+                    navigate("/applicantPage");
+                }else if(role === 'Employer'){
+                    console.log('Navigating to employer dashboard');
+                    navigate("/employerPage");
+                }else if(role === 'Institution'){
+                    console.log('Navigating to institute dashboard');
+                    navigate("/institutePage");
+                }
             }
         }
         catch(err){
@@ -153,7 +160,7 @@ const LoginForm = () => {
                     
                     <div className="text-center pt-2">
                         <p className="text-sm text-gray-600">
-                            not have an account? <a className="text-blue-700 hover:text-blue-900 font-bold transition"><Link to={"/signup"}>register</Link></a>
+                            not have an account? <Link to={"/signup"} className="text-blue-700 hover:text-blue-900 font-bold transition">register</Link>
                         </p>
                     </div>
 

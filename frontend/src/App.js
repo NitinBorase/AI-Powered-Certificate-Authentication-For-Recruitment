@@ -8,6 +8,7 @@ import Signup from './pages/Signup';
 import ApplicantPage from './pages/ApplicantPage';
 import EmployerPage from './pages/EmployerPage';
 import InstitutePage from './pages/InstitutePage';
+import SearchJobs from './pages/SearchJobs';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/applicantPage" element={<ApplicantPage />} />
         <Route path="/employerPage" element={<EmployerPage />} />
         <Route path="/institutePage" element={<InstitutePage />} />
+        <Route path="/jobs" element={<SearchJobs />} />
       </Routes>
     </Router>
   );  

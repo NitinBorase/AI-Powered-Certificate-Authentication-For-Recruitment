@@ -10,12 +10,20 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const storage = new CloudinaryStorage({
+const resumeStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'ai_certi_resumes', 
-    allowed_formats: ['pdf'], 
+    folder: 'ai_certi_resumes',
+    allowed_formats: ['pdf'],
   },
 });
 
-module.exports = { cloudinary, storage };
+const certificateStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'ai_certi_certificates',
+    allowed_formats: ['pdf', 'jpg', 'jpeg', 'png'],
+  },
+});
+
+module.exports = { cloudinary, resumeStorage, certificateStorage }; 

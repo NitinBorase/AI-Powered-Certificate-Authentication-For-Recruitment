@@ -5,14 +5,25 @@ const ApplicantSchema = new mongoose.Schema({
     password : String,
 
     resumeUrl: { 
-    type: String, 
-    default: '' 
-  },
-  
+      type: String, 
+      default: '' 
+    },
+
     fileName: {
-    type: String,
-    default: 'Not uploaded'
-    }
+      type: String,
+      default: 'Not uploaded'
+    },
+
+    certificates: [
+      {
+        id: { type: String },
+        fileName: { type: String },
+        url: { type: String },
+        status: { type: String, default: 'Pending' },
+        uploadedDate: { type: String },
+        actionRequired: { type: String, default: 'No Action Required' }
+      }
+    ]
 });
 
-module.exports = mongoose.model('Applicant', ApplicantSchema);
+module.exports = mongoose.model('Applicant', ApplicantSchema); 

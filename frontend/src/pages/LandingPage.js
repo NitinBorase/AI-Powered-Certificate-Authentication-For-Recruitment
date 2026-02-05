@@ -87,12 +87,10 @@ const App = () => {
             <nav className="w-full bg-blue-800 shadow-md py-4 px-8 flex justify-between items-center fixed top-0 z-10">
                 <h1 className="text-xl font-bold text-white tracking-wider">AI-CertiAuth</h1>
                 <div className="space-x-6 hidden sm:flex">
-                    <a className="text-gray-200 hover:text-white transition duration-200"><Link to={"/about"}>About</Link></a>
-                    <a className="text-gray-200 hover:text-white transition duration-200"><Link to={"/feature"}>Features</Link></a>
-                    <a className="text-gray-200 hover:text-white transition duration-200"><Link to={"/"}>Contact</Link></a>
-                    <a className="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-600 shadow-md transition duration-200">
-                        <Link to={"/login"}>Login/Register</Link>
-                    </a>
+                    <Link to={"/about"} className="text-gray-200 hover:text-white transition duration-200">About</Link>
+                    <Link to={"/feature"} className="text-gray-200 hover:text-white transition duration-200">Features</Link>
+                    <Link to={"/"} className="text-gray-200 hover:text-white transition duration-200">Contact</Link>
+                    <Link to={"/login"} className="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-600 shadow-md transition duration-200">Login/Register</Link>
                 </div>
 
                 <button className="sm:hidden text-white focus:outline-none">

@@ -8,9 +8,9 @@ const Header = () => (
         <div className="max-w-7xl mx-auto flex justify-end items-center">
             <nav>
                 <ul className="flex space-x-6 text-sm font-medium">
-                    <li><a className="hover:text-red-700 transition"><Link to={"/feature"}>Features</Link></a></li>
-                    <li><a className="font-semibold hover:text-red-700 transition"><Link to={"/login"}>Login/Register</Link></a></li>
-                    <li><a className="hover:text-red-700 transition"><Link to={"/"}>Contact</Link></a></li>
+                    <li><Link to={"/feature"} className="hover:text-red-700 transition">Features</Link></li>
+                    <li><Link to={"/login"} className="font-semibold hover:text-red-700 transition">Login/Register</Link></li>
+                    <li><Link to={"/"} className="hover:text-red-700 transition">Contact</Link></li>
                 </ul>
             </nav>
         </div>
