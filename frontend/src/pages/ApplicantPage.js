@@ -75,12 +75,12 @@ const App = () => {
     setUploading(true);
 
     try{
-      const response = await axios.post('http://localhost:5000/api/files/uploadResume', formData);
+      const response = await axios.post('https://ai-powered-certificate-authentication.onrender.com/api/files/uploadResume', formData);
 
       const resumeUrl = response.data.fileUrl;
       const userEmail = localStorage.getItem('userEmail');
 
-      const dbResponse = await axios.post('http://localhost:5000/api/files/update-db', {
+      const dbResponse = await axios.post('https://ai-powered-certificate-authentication.onrender.com/api/files/update-db', {
         email: userEmail,
         resumeUrl: resumeUrl,
         fileName: file.name
