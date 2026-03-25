@@ -161,7 +161,7 @@ const App = () => {
       if (dbRes.data && dbRes.data.success) {
         const cert = dbRes.data.certificate;
         setCertificates(prev => [cert, ...prev]);
-        alert('Certificate uploaded and marked as Pending.');
+        alert('Certificate uploaded to your profile.');
       } else {
         throw new Error(dbRes.data?.message || 'DB update failed');
       }
@@ -200,10 +200,6 @@ const App = () => {
         <h2 className="mb-8 text-2xl font-light text-gray-700">
           Hii <span className="font-semibold text-gray-900">{userName}</span>
         </h2>
-
-        <div className="mb-6">
-          <Link to="/jobs" className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md">Search Jobs</Link>
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           
