@@ -3,32 +3,41 @@ const Applicant = require('../models/Applicant');
 
 async function validateCertificateIntegrity(applicantId, certificateId) {
     try {
-        const applicant = await Applicant.findById(applicantId);
+        const applicant = await Applicant.findOne({ email: applicantId });
         if (!applicant) throw new Error("Applicant not found");
-
-        const certificate = applicant.certificates.id(certificateId);
+        console.log(certificateId);
+        const certificate = applicant.certificates.find(
+            cert => cert.id === certificateId || cert._id.toString() === certificateId
+        );
         if (!certificate) throw new Error("Certificate not found");
         if (!certificate.url) throw new Error("No image URL to scan");
-
-        const expectedName = applicant.email.split('@')[0];
-        const expectedCourse = certificate.standardizedSkills.join(" ") || certificate.extractedText;
 
         console.log(`Verifying QR & Data for: ${certificate.fileName}...`);
 
         const safeImageUrl = certificate.url.replace(/\.pdf$/i, '.jpg');
 
-        const pythonResponse = await axios.post('http://localhost:8000/verify-qr-and-data', {
-            image_url: safeImageUrl,
-            expected_name: expectedName,
-            expected_course: expectedCourse
-        });
+        console.log(`Sending data to Python service: ${safeImageUrl}`);
 
-        const result = pythonResponse.data;
-
+        try{
+            const pythonResponse = await axios.post('http://127.0.0.1:8000/verify-qr-and-data', {
+            image_url: safeImageUrl
+            });
+            result = pythonResponse.data;
+            console.log(`Received response from Python service: ${JSON.stringify(pythonResponse.data)}`);
+        }catch(err){
+            console.error("Error communicating with Python service:", err.message);
+            return null;
+        }
+        
+        console.log(`Python Service Response: ${JSON.stringify(result)}`);
         if (result.is_verified) {
             certificate.status = 'Verified';
             certificate.actionRequired = 'None';
-        } else {
+        }else if(result.status === "QR_Not_Detected") {
+            certificate.status = 'QR Not Detected | Pending';
+            certificate.actionRequired = 'Module comping soon..';
+        }
+         else {
             certificate.status = 'Not Verified';
             certificate.actionRequired = `Manual Review: ${result.reason}`; 
         }
