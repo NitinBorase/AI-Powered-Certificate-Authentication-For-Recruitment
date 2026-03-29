@@ -7,12 +7,18 @@ import re
 from pyzbar.pyzbar import decode
 from playwright.sync_api import sync_playwright
 import easyocr 
+import pytesseract
+from urlextract import URLExtract
+pytesseract.pytesseract.tesseract_cmd = r"C:\Users\Nitin\Documents\GitHub\AI-Powered-Certificate-Authentication-For-Recruitment\tesseract.exe"
 
 app = FastAPI()
 
 print("Loading EasyOCR AI model... (This takes a few seconds)")
 reader = easyocr.Reader(['en'], gpu=False)
 print("✅ EasyOCR loaded and ready!")
+
+print("Loading URLExtract...")
+url_extractor = URLExtract()
 
 class ValidationRequest(BaseModel):
     image_url: str
@@ -25,7 +31,12 @@ def fetch_image_from_url(url):
         img = cv2.imdecode(arr, -1)
         if img is None:
             raise ValueError("Could not decode image.")
-        return img
+        
+        gray_img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        
+        large_img = cv2.resize(gray_img, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+        return large_img
+    
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to fetch image: {str(e)}")
 
@@ -35,6 +46,19 @@ def get_word_set(text):
     stop_words = {"the", "and", "for", "with", "this", "that", "has", "been"}
     return set(w for w in words if w not in stop_words)
 
+def clean_url(url):
+    url = url.strip()
+
+    # Fix protocol
+    url = url.replace("https:/", "https://")
+    url = url.replace("http:/", "http://")
+
+    # Fix missing 'www.'
+    if "mygreatlearning.com" in url and "www." not in url:
+        url = url.replace("https://", "https://www.")
+
+    return url
+
 @app.post("/verify-qr-and-data")
 def verify_qr_and_data(data: ValidationRequest):
     img = fetch_image_from_url(data.image_url)
@@ -43,17 +67,34 @@ def verify_qr_and_data(data: ValidationRequest):
     # detail=0 returns a simple list of strings instead of complex bounding box coordinates
     text_list = reader.readtext(img, detail=0)
     cert_text = " ".join(text_list)
+
     cert_words = get_word_set(cert_text)
-    
+
+    cert_text_string = pytesseract.image_to_string(img)
+    cert_text_string = clean_url(cert_text_string)
     if len(cert_words) == 0:
         return {"status": "Failed", "reason": "Could not read any text from the certificate image.", "is_verified": False}
 
-    # --- 2. Scan for QR Code ---
+    print(f"URL Text:", cert_text_string)
+    # --- 2. Scan for QR Code and URL in certificate---
     qr_data = decode(img)
-    if not qr_data:
-        return {"status": "QR_Not_Detected", "reason": "No QR code detected.", "is_verified": False}
-        
-    qr_url = qr_data[0].data.decode('utf-8')
+    qr_url = None
+    if len(qr_data) > 0:
+        qr_url = qr_data[0].data.decode('utf-8')
+        print(f"Found URL via QR Code: {qr_url}")
+    else:
+        found_urls = url_extractor.find_urls(cert_text_string)
+        if len(found_urls) > 0:
+            qr_url = found_urls[0] # Grab the first URL found
+            
+            # Safely add https:// if the printed link was missing it (e.g. Great Learning)
+            if not qr_url.startswith('http'):
+                qr_url = 'https://' + qr_url
+                
+            print(f"✅ Found URL via urlextract: {qr_url}")
+    
+    if not qr_url:
+        return {"status": "NO_QR_Link", "reason": "No QR code or URL found in the certificate image.", "is_verified": False, "qr_link": None}
     
     # --- 3. Scrape the Verification Webpage ---
     page_text = ""

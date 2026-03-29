@@ -33,8 +33,8 @@ async function validateCertificateIntegrity(applicantId, certificateId) {
         if (result.is_verified) {
             certificate.status = 'Verified';
             certificate.actionRequired = 'None';
-        }else if(result.status === "QR_Not_Detected") {
-            certificate.status = 'QR Not Detected | Pending';
+        }else if(result.status === "NO_QR_Link") {
+            certificate.status = 'QR & Link Detected | Pending';
             certificate.actionRequired = 'Module comping soon..';
         }
          else {

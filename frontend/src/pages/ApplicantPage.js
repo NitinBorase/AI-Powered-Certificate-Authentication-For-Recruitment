@@ -182,6 +182,10 @@ const App = () => {
   // Add this state to track which certificates are currently loading
 const [validatingIds, setValidatingIds] = useState({});
 
+const handleRefresh = () => {
+  window.location.reload();
+};
+
 // The function to handle the validation click
 const handleValidateCertificate = async (certId) => {
   // 1. Set THIS specific certificate's loading state to true
@@ -196,9 +200,9 @@ const handleValidateCertificate = async (certId) => {
     if(response.status === Verified){
       setCertificates((prev) => prev.map(cert => cert.id === certId ? { ...cert, status: 'Verified', actionRequired: 'None' } : cert));
       alert(`Certificate ${certId} is Verified!`);
-    }else if(response.data.status === "QR_Not_Detected"){
-      setCertificates((prev) => prev.map(cert => cert.id === certId ? { ...cert, status: 'QR Not Detected | Pending', actionRequired: 'Module comping soon..' } : cert));
-      alert(`Certificate ${certId} is pending verification. QR code not detected.`);
+    }else if(response.data.status === "NO_QR_Link"){
+      setCertificates((prev) => prev.map(cert => cert.id === certId ? { ...cert, status: 'NO QR, No Link | Pending', actionRequired: 'Module comping soon..' } : cert));
+      alert(`Certificate ${certId} is pending verification. QR code & Link not detected.`);
     }else if(response.status === 'Not Verified') {
       setCertificates((prev) => prev.map(cert => cert.id === certId ? { ...cert, status: 'Not Verified', actionRequired: `Manual Review: ${response.reason}` } : cert));
       alert(`Certificate ${certId} is Not Verified. Reason: ${response.data.data.reason}`);
@@ -209,6 +213,7 @@ const handleValidateCertificate = async (certId) => {
   } finally {
     // 4. Turn off the loading animation for this certificate
     setValidatingIds((prev) => ({ ...prev, [certId]: false }));
+    handleRefresh();
   }
 };
 
