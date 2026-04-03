@@ -9,7 +9,10 @@ from playwright.sync_api import sync_playwright
 import easyocr 
 import pytesseract
 from urlextract import URLExtract
-pytesseract.pytesseract.tesseract_cmd = r"C:\Users\Nitin\Documents\GitHub\AI-Powered-Certificate-Authentication-For-Recruitment\tesseract.exe"
+import os
+# pytesseract.pytesseract.tesseract_cmd = r"C:\Users\Nitin\Documents\GitHub\AI-Powered-Certificate-Authentication-For-Recruitment\tesseract.exe"
+base_dir = os.path.dirname(os.path.abspath(__file__))
+pytesseract.pytesseract.tesseract_cmd = os.path.join(base_dir, "tesseract.exe")
 
 app = FastAPI()
 
