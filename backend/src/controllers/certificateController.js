@@ -57,6 +57,14 @@ async function validateAllCertificates() {
     }
 }
 
+const validateCertificateIntegrity = async (req, res) => {
+    try {
+        res.status(200).json({ message: "Integrity validation endpoint working" });
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+}
+
 module.exports = { 
     validateCertificateIntegrity, 
     validateAllCertificates 

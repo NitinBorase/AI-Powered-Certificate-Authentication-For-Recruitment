@@ -6,6 +6,7 @@ const { updateResume, updateCertificate, getUserProfile } = require('../controll
 
 const uploadResume = multer({ storage: resumeStorage });
 const uploadCertificate = multer({ storage: certificateStorage });
+const upload = multer({ storage: certificateStorage });
 
 router.post('/uploadResume', uploadResume.single('resume'), (req, res) => {
     try{
@@ -38,6 +39,28 @@ router.post('/uploadCertificate', uploadCertificate.single('certificate'), (req,
   } catch (err) {
     res.status(500).json({ message: 'Server Error', error: err.message });
   }
+});
+
+router.post('/uploadCertificate', upload.single('certificate'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No file uploaded' });
+        }
+
+        // 3. Because you are using multer-storage-cloudinary, the file is ALREADY 
+        // uploaded to Cloudinary by the time the code reaches here.
+        // The secure URL is automatically available at req.file.path
+        const fileUrl = req.file.path;
+        
+        console.log("Successfully uploaded to Cloudinary:", fileUrl);
+
+        // 4. Send the real Cloudinary URL back to the React frontend
+        res.json({ success: true, fileUrl: fileUrl });
+        
+    } catch (error) {
+        console.error('Cloudinary upload error:', error);
+        res.status(500).json({ success: false, message: 'Cloud upload failed' });
+    }
 });
 
 router.post('/update-db', updateResume);

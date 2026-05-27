@@ -27,6 +27,9 @@ app.get('/', (req, res) => {
   res.send('Backend is running');
 });
 
+const certificateRoutes = require('./src/routes/certificateRoutes');
+app.use('/api/institution', certificateRoutes);
+
 const { validateCertificateIntegrity } = require('../backend/src/services/QRvalidation');
 
 app.post('/validate-qr/:applicantId/:certificateId', async (req, res) => {
