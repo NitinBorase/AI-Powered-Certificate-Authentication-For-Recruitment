@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { UserCircle, Bell, Upload, FileText, CheckCircle, Clock, XCircle, AlertTriangle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { UserCircle, Bell, Upload, FileText, CheckCircle, Clock, XCircle, AlertTriangle, LogOut } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const InstitutionApp = () => {
   const [certificates, setCertificates] = useState([]);
   const [certUploading, setCertUploading] = useState(false);
+  const navigate = useNavigate();
   
   const certFileInputRef = useRef(null);
   
@@ -105,6 +106,15 @@ const InstitutionApp = () => {
     }
   };
 
+  const handleLogout = () => {
+    // 1. Delete all user authentication data from local storage
+    localStorage.removeItem('userEmail'); 
+    // Pro-tip: If you want to wipe absolutely EVERYTHING saved locally, use: localStorage.clear();
+
+    // 2. Instantly redirect the user straight back to the home / login page
+    navigate('/'); 
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans flex flex-col">
       {/* HEADER */}
@@ -116,6 +126,13 @@ const InstitutionApp = () => {
             <span className="text-sm font-medium hidden md:inline">{institutionEmail}</span>
             <UserCircle className="w-6 h-6 cursor-pointer hover:text-blue-300" />
             <Bell className="w-6 h-6 cursor-pointer hover:text-blue-300" />
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition duration-150 ease-in-out shadow-md ml-2"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden xs:inline">Logout</span>
+            </button>
           </div>
         </nav>
       </header>

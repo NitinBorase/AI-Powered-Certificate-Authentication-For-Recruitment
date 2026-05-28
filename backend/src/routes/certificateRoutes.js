@@ -7,6 +7,9 @@ const crypto = require('crypto');
 const axios = require('axios');
 const Certificate = require('../models/Certificate');
 
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() }); // Stores file in RAM buffer temporarily
+
 // POST route to trigger the bulk sweep
 router.post('/admin/certificates/validate-all', async (req, res) => {
     try {
@@ -60,7 +63,7 @@ router.post('/update-certificates', async (req, res) => {
         }
 
         // 3. Generate the SHA-256 Hash using the extracted text
-        const uniqueDataString = `${email}-${extractedText}`;
+        const uniqueDataString = `${extractedText}`;
         const generatedHash = crypto.createHash('sha256').update(uniqueDataString).digest('hex');
         
         console.log(`Generated Hash for certificate: ${generatedHash}`);
@@ -132,6 +135,83 @@ router.get('/profile', async (req, res) => {
     } catch (error) {
         console.error('Error fetching profile:', error);
         res.status(500).json({ success: false, message: 'Server error while fetching profile' });
+    }
+});
+
+// POST: Verify a PDF certificate by extracting text and checking the Hash Registry
+router.post('/verify-pdf-url', async (req, res) => {
+    try {
+        const { email, certificateUrl } = req.body;
+
+        if (!certificateUrl || !email) {
+            return res.status(400).json({ success: false, message: 'Missing email or certificate URL.' });
+        }
+
+        console.log(`Starting clean verification for URL: ${certificateUrl}...`);
+        
+        // 1. Fetch the PDF file from Cloudinary exactly like we do during issuance
+        const pdfResponse = await axios.get(certificateUrl, { responseType: 'arraybuffer' });
+        const pdfBuffer = Buffer.from(pdfResponse.data);
+        
+        // 2. Extract the text using the identical layout loop
+        let extractedText = "";
+        
+        await new Promise((resolve, reject) => {
+            new PdfReader().parseBuffer(pdfBuffer, (err, item) => {
+                if (err) {
+                    reject(err);
+                } else if (!item) {
+                    resolve(); 
+                } else if (item.text) {
+                    extractedText += item.text + " ";
+                }
+            });
+        });
+
+        extractedText = extractedText.trim();
+
+        if (!extractedText) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Could not read text content. Ensure it is a valid digital PDF.' 
+            });
+        }
+
+        // 3. Generate the SHA-256 Hash using the identical blueprint pattern
+        const uniqueDataString = `${extractedText}`;
+        const generatedHash = crypto.createHash('sha256').update(uniqueDataString).digest('hex');
+        
+        console.log(`Generated Verification Hash: ${generatedHash}`);
+
+        // 4. Search the Global Registry for a match
+        const verifiedRecord = await Certificate.findOne({ hashId: generatedHash });
+
+        // 5. Send back the Verdict
+        if (!verifiedRecord) {
+            return res.json({ 
+                success: false, 
+                isVerified: false,
+                message: 'Verification Failed: This document has been tampered with or was never issued.' 
+            });
+        }
+
+        // Perfect match found
+        res.json({ 
+            success: true, 
+            isVerified: true,
+            actionRequired: 'None | Verified By Blockchain',
+            message: 'Certificate Authenticity Verified Successfully!',
+            data: {
+                fileName: verifiedRecord.fileName,
+                institutionEmail: verifiedRecord.institutionEmail,
+                issueDate: verifiedRecord.issueDate,
+                hashId: verifiedRecord.hashId
+            }
+        });
+
+    } catch (error) {
+        console.error('Error during certificate verification processing:', error);
+        res.status(500).json({ success: false, message: 'Internal server error during verification process.' });
     }
 });
 

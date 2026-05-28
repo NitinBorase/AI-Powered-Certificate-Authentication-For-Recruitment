@@ -20,7 +20,9 @@ async function validateCertificateIntegrity(applicantId, certificateId) {
 
         try{
             const pythonResponse = await axios.post('http://127.0.0.1:8000/verify-qr-and-data', {
-            image_url: safeImageUrl
+                image_url: safeImageUrl,
+                institution_email: applicantId,
+                pdf_url: certificate.url
             });
             result = pythonResponse.data;
             console.log(`Received response from Python service: ${JSON.stringify(pythonResponse.data)}`);
@@ -36,6 +38,9 @@ async function validateCertificateIntegrity(applicantId, certificateId) {
         }else if(result.status === "NO_QR_Link") {
             certificate.status = 'QR & Link Detected | Pending';
             certificate.actionRequired = 'Module comping soon..';
+        }else if(result.isVerified === true){
+            certificate.status = 'Verified';
+            certificate.actionRequired = 'None | Verified by BlockChain';
         }
          else {
             certificate.status = 'Not Verified';
@@ -44,7 +49,8 @@ async function validateCertificateIntegrity(applicantId, certificateId) {
 
         await applicant.save();
 
-        console.log(`Validation Complete: ${result.status} - ${result.reason}`);
+        console.log(`Validation Complete: ${certificate.status} - ${certificate.actionRequired}`);
+        console.log('Full Certificate Object: ',certificate);
         return certificate;
 
     } catch (error) {

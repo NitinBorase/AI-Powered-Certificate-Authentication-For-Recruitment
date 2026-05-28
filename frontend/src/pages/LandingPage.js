@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ShieldCheck, Users, Briefcase, Zap, Globe } from 'lucide-react';
+import { ShieldCheck, Users, Briefcase, Zap, Globe, QrCode, Link as LinkIcon, Database } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const features = [
@@ -98,15 +98,15 @@ const App = () => {
                 </button>
             </nav>
             <div className="pt-16"></div>
-            
-            <section id="about" className="text-center py-20 px-6 bg-white max-w-7xl mx-auto rounded-xl shadow-inner my-8 animate-fade-in" style={{'--delay': '0ms'}}>
+
+            <section id="about" className="text-center py-20 px-6 bg-white max-w-7xl mx-auto rounded-xl shadow-inner my-8 animate-fade-in" style={{ '--delay': '0ms' }}>
                 <div className="flex justify-center items-center mb-4">
                     <Zap className="w-8 h-8 text-blue-600 mr-2" />
                     <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-800">
                         AI Powered Certificate Authentication
                     </h2>
                 </div>
-                
+
                 <h3 className="text-2xl sm:text-3xl font-bold text-red-700 mt-2 tracking-wide">
                     Authenticity Meets Opportunity.
                 </h3>
@@ -119,36 +119,101 @@ const App = () => {
                     </a>
                 </div>
             </section>
-        
+
+            {/* --- HOW WE VERIFY CERTIFICATES SECTION --- */}
+            <section id="how-it-works" className="py-20 px-6 max-w-7xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-100 my-12">
+                <div className="text-center mb-16 animate-fade-in" style={{ '--delay': '100ms' }}>
+                    <h3 className="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">
+                        How We Verify Your Certificates
+                    </h3>
+                    <p className="text-gray-500 mt-3 text-lg max-w-2xl mx-auto">
+                        Our multi-layered AI verification infrastructure uses three robust automated pathways to authenticate credentials.
+                    </p>
+                </div>
+
+                {/* Horizontal Steps Layout */}
+                <div className="flex flex-col md:flex-row justify-between items-stretch gap-8">
+
+                    {/* Step 1: QR Code */}
+                    <div className="flex-1 p-6 rounded-xl bg-gray-50 border border-gray-200 shadow-md hover:shadow-xl transition transform hover:-translate-y-1 duration-300 animate-fade-in" style={{ '--delay': '200ms' }}>
+                        <div className="flex items-center space-x-4 mb-4">
+                            <div className="p-3 bg-blue-100 text-blue-600 rounded-lg">
+                                <QrCode className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <span className="text-xs font-bold text-blue-600 tracking-wider uppercase">Path A</span>
+                                <h4 className="text-xl font-bold text-gray-800">Instant QR Decoding</h4>
+                            </div>
+                        </div>
+                        <p className="text-gray-600 text-sm leading-relaxed">
+                            Our scanning parser isolates embedded micro-QR graphics instantly to read encrypted endpoint security markers, checking authenticity in milliseconds.
+                        </p>
+                    </div>
+
+                    {/* Step 2: Live URL Web Scraping */}
+                    <div className="flex-1 p-6 rounded-xl bg-gray-50 border border-gray-200 shadow-md hover:shadow-xl transition transform hover:-translate-y-1 duration-300 animate-fade-in" style={{ '--delay': '400ms' }}>
+                        <div className="flex items-center space-x-4 mb-4">
+                            <div className="p-3 bg-red-100 text-red-600 rounded-lg">
+                                <LinkIcon className="w-6 h-6" /> {/* 🌟 Changed from Link to LinkIcon here */}
+                            </div>
+                            <div>
+                                <span className="text-xs font-bold text-red-600 tracking-wider uppercase">Path B</span>
+                                <h4 className="text-xl font-bold text-gray-800">Live URL Scraping</h4>
+                            </div>
+                        </div>
+                        <p className="text-gray-600 text-sm leading-relaxed">
+                            If no QR code is found, our system locates printed URLs on the page, using automated backend browser actions to check live metadata configurations at the origin site.
+                        </p>
+                    </div>
+
+                    {/* Step 3: Cryptographic Ledger Check */}
+                    <div className="flex-1 p-6 rounded-xl bg-gray-50 border border-gray-200 shadow-md hover:shadow-xl transition transform hover:-translate-y-1 duration-300 animate-fade-in" style={{ '--delay': '600ms' }}>
+                        <div className="flex items-center space-x-4 mb-4">
+                            <div className="p-3 bg-green-100 text-green-600 rounded-lg">
+                                <Database className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <span className="text-xs font-bold text-green-600 tracking-wider uppercase">Path C</span>
+                                <h4 className="text-xl font-bold text-gray-800">Global Registry Match</h4>
+                            </div>
+                        </div>
+                        <p className="text-gray-600 text-sm leading-relaxed">
+                            For flat uploads, we extract text structures via PDF streams to generate a secure SHA-256 cryptographic hash fingerprint, cross-referencing against our central database records.
+                        </p>
+                    </div>
+
+                </div>
+            </section>
+
             <section id="features" className="py-16 px-6 max-w-7xl mx-auto">
-                <h3 className="text-3xl font-bold text-gray-800 text-center mb-12 animate-fade-in" style={{'--delay': '100ms'}}>
+                <h3 className="text-3xl font-bold text-gray-800 text-center mb-12 animate-fade-in" style={{ '--delay': '100ms' }}>
                     What We Provide to Our Users
                 </h3>
                 <div className="flex flex-wrap -mx-4 justify-center">
                     {features.map((feature, index) => (
-                        <FeatureCard 
-                            key={index} 
-                            {...feature} 
-                            delay={200 + index * 200} 
+                        <FeatureCard
+                            key={index}
+                            {...feature}
+                            delay={200 + index * 200}
                         />
                     ))}
                 </div>
             </section>
 
             <section id="contact" className="text-center py-16 bg-blue-700 text-white shadow-2xl mt-10">
-                <h3 className="text-3xl sm:text-4xl font-bold animate-fade-in" style={{'--delay': '0ms'}}>
+                <h3 className="text-3xl sm:text-4xl font-bold animate-fade-in" style={{ '--delay': '0ms' }}>
                     Start Securing Your Future Today!
                 </h3>
-                <p className="text-lg mt-4 animate-fade-in" style={{'--delay': '200ms'}}>
+                <p className="text-lg mt-4 animate-fade-in" style={{ '--delay': '200ms' }}>
                     Join the verified network and unlock a world of trust and opportunity.
                 </p>
-                <div className="mt-8 animate-fade-in" style={{'--delay': '400ms'}}>
+                <div className="mt-8 animate-fade-in" style={{ '--delay': '400ms' }}>
                     <a href="#login" className="bg-white text-blue-700 px-8 py-4 rounded-full text-lg font-bold hover:bg-gray-100 transition transform hover:scale-105 shadow-xl">
                         Register Now
                     </a>
                 </div>
             </section>
-        
+
             <footer className="text-center py-4 bg-blue-900 text-gray-300 text-sm">
                 <p>@AI-CertiAuth all rights reserved | <Globe className="w-4 h-4 inline mr-1" /> Built on Trust</p>
             </footer>

@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { UserCircle, Bell, Upload, FileText, CheckCircle, Clock, XCircle, AlertTriangle, FileInput, Verified } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
-
+import { Link, useNavigate } from 'react-router-dom'; 
+import { UserCircle, Bell, Upload, FileText, CheckCircle, Clock, XCircle, AlertTriangle, LogOut } from 'lucide-react'; // Added LogOut icon
 
 const initialCertificates = [];
 //Comment
@@ -30,41 +29,42 @@ const App = () => {
   const userName = `${userEmail}`;
   const organizationName = "AI-CertiAuth";
 
+  const navigate = useNavigate();
   useEffect(() => {
-        const fetchUserData = async () => {
-            const userEmail = localStorage.getItem('userEmail');
-            if (!userEmail) {
-                console.log('No userEmail in localStorage; skipping profile fetch');
-                return;
-            }
+    const fetchUserData = async () => {
+      const userEmail = localStorage.getItem('userEmail');
+      if (!userEmail) {
+        console.log('No userEmail in localStorage; skipping profile fetch');
+        return;
+      }
 
-            try {
-                const response = await axios.get(`http://localhost:5000/api/files/profile?email=${userEmail}`);
-                if (response.data.success) {
-                    console.log("Fetched profile data:", response.data);
-                    setResumeUrl(response.data.user.resumeUrl || '');
-                    setCurrentResume(response.data.user.fileName || 'No resume uploaded');
-                    setCertificates(response.data.user.certificates || []);
-                } else {
-                    setCurrentResume("No resume uploaded");
-                }
-            } catch (error) {
-                console.error("Error fetching profile:", error);
-                setCurrentResume("Error loading profile");
-            }
-        };
+      try {
+        const response = await axios.get(`http://localhost:5000/api/files/profile?email=${userEmail}`);
+        if (response.data.success) {
+          console.log("Fetched profile data:", response.data);
+          setResumeUrl(response.data.user.resumeUrl || '');
+          setCurrentResume(response.data.user.fileName || 'No resume uploaded');
+          setCertificates(response.data.user.certificates || []);
+        } else {
+          setCurrentResume("No resume uploaded");
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        setCurrentResume("Error loading profile");
+      }
+    };
 
+    fetchUserData();
+
+    // Re-fetch if the user logs in from another tab (storage event)
+    const onStorage = (e) => {
+      if (e.key === 'userEmail') {
         fetchUserData();
-
-        // Re-fetch if the user logs in from another tab (storage event)
-        const onStorage = (e) => {
-            if (e.key === 'userEmail') {
-                fetchUserData();
-            }
-        };
-        window.addEventListener('storage', onStorage);
-        return () => window.removeEventListener('storage', onStorage);
-    }, []);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const fileInputRef = useRef(null);
 
@@ -74,7 +74,7 @@ const App = () => {
 
     setUploading(true);
 
-    try{
+    try {
       const response = await axios.post('https://ai-powered-certificate-authentication.onrender.com/api/files/uploadResume', formData);
 
       const resumeUrl = response.data.fileUrl;
@@ -87,31 +87,31 @@ const App = () => {
       });
 
       if (dbResponse.data.success) {
-          setCurrentResume(file.name);
-          // alert("Resume uploaded and saved to profile!");
-          console.log("Database updated with resume URL:", resumeUrl, dbResponse.data.user);
+        setCurrentResume(file.name);
+        // alert("Resume uploaded and saved to profile!");
+        console.log("Database updated with resume URL:", resumeUrl, dbResponse.data.user);
       }
 
-      if(response.data.success){
+      if (response.data.success) {
         setCurrentResume(file.name);
         alert('Resume uploaded successfully!');
         console.log('Resume uploaded successfully:', response.data.fileUrl);
       }
     }
-    catch(err){
+    catch (err) {
       console.error('Error uploading resume:', err);
       alert('Failed to upload resume. Please try again.');
     }
-    finally{
+    finally {
       setUploading(false);
     }
   };
 
-  const handleFileChange = async(event) => {
+  const handleFileChange = async (event) => {
     const file = event.target.files[0];
-    if(!file) return;
+    if (!file) return;
 
-    if(file.type !== 'application/pdf'){
+    if (file.type !== 'application/pdf') {
       alert('Please upload a PDF file.');
       return;
     }
@@ -174,124 +174,201 @@ const App = () => {
     }
   };
 
-  const handleVerifyAction = (certId, fileName) => {
-    console.log(`User requested verification for: ${fileName}`);
-    alert(`Verification request sent for ${fileName}. We'll notify you soon.`);
+  const handleVerifyAction = (certId, fileName, status) => {
+    if(status === 'Not Verified') {
+      alert(`Your ${fileName} Certificate is not verified please check from your side`);
+    }
+    if(status === 'Pending'){
+      alert('Click validate button to verify your certificate');
+    }
   };
 
   // Add this state to track which certificates are currently loading
-const [validatingIds, setValidatingIds] = useState({});
+  const [validatingIds, setValidatingIds] = useState({});
 
-const handleRefresh = () => {
-  window.location.reload();
-};
+  const handleRefresh = () => {
+    window.location.reload();
+  };
 
-// The function to handle the validation click
-const handleValidateCertificate = async (certId) => {
-  // 1. Set THIS specific certificate's loading state to true
-  setValidatingIds((prev) => ({ ...prev, [certId]: true }));
+  // The function to handle the validation click
+  const handleValidateCertificate = async (certId) => {
+    // 1. Set THIS specific certificate's loading state to true
+    setValidatingIds((prev) => ({ ...prev, [certId]: true }));
 
-  try {
-    // 2. Call your backend (replace 'applicant123' with your actual dynamic ID)
-    const response = await axios.post(`http://localhost:5000/validate-qr/${userEmail}/${certId}`);
-    
-    // 3. IMPORTANT: Update your main 'certificates' state here with the new status!
-    // e.g., updateCertificateStatusInState(certId, response.data.success ? 'Verified' : 'Not Verified')
-    if(response.status === Verified){
-      setCertificates((prev) => prev.map(cert => cert.id === certId ? { ...cert, status: 'Verified', actionRequired: 'None' } : cert));
-      alert(`Certificate ${certId} is Verified!`);
-    }else if(response.data.status === "NO_QR_Link"){
-      setCertificates((prev) => prev.map(cert => cert.id === certId ? { ...cert, status: 'NO QR, No Link | Pending', actionRequired: 'Module comping soon..' } : cert));
-      alert(`Certificate ${certId} is pending verification. QR code & Link not detected.`);
-    }else if(response.status === 'Not Verified') {
-      setCertificates((prev) => prev.map(cert => cert.id === certId ? { ...cert, status: 'Not Verified', actionRequired: `Manual Review: ${response.reason}` } : cert));
-      alert(`Certificate ${certId} is Not Verified. Reason: ${response.data.data.reason}`);
+    try {
+      // 2. Call your backend (replace 'applicant123' with your actual dynamic ID)
+      const response = await axios.post(`http://localhost:5000/validate-qr/${userEmail}/${certId}`);
+
+      // 3. IMPORTANT: Update your main 'certificates' state here with the new status!
+      // e.g., updateCertificateStatusInState(certId, response.data.success ? 'Verified' : 'Not Verified')
+      // 1. Grab the direct response object from Axios
+      // 1. Grab the response data safely
+      let result = response.data;
+
+      if (typeof result === 'string') {
+        try {
+          result = JSON.parse(result);
+        } catch (parseError) {
+          console.error("Could not parse backend response string:", parseError);
+        }
+      }
+
+      // 🔍 DIAGNOSTIC LOGS: See exactly what values are arriving in your browser console
+      console.log("📊 Raw Object Content:", result);
+      console.log("🔍 Testing Top-Level Status:", result?.status);
+      console.log("🔍 Testing Nested Data Status:", result?.data?.status);
+
+      // 🌟 BULLETPROOF CONDITION: Checks all structures & normalizes text case
+      const isVerifiedSuccess = 
+        result?.status?.toLowerCase() === "verified" || 
+        result?.isVerified === true || 
+        result?.success === true ||
+        result?.data?.status?.toLowerCase() === "verified" ||
+        result?.certificate?.status?.toLowerCase() === "verified";
+
+      if (isVerifiedSuccess) {
+        // Extract the filename safely from whichever layer it lives on
+        const finalFileName = result?.fileName || result?.data?.fileName || "C Certificate.pdf";
+
+        setCertificates((prev) =>
+          prev.map(cert => {
+            if (cert.id === certId || cert._id === certId || String(cert._id) === String(certId)) {
+              return {
+                ...cert,
+                status: 'Verified',
+                actionRequired: 'None | Verified by BlockChain'
+              };
+            }
+            return cert;
+          })
+        );
+
+        console.log(`Validation Complete: Verified - ${finalFileName}`);
+        alert(`Certificate Authenticity Verified Successfully!\nDocument: ${finalFileName}`);
+
+      } else {
+        // If it genuinely fails, extract the error message dynamically
+        const errorReason = result?.message || result?.reason || "Cryptographic footprint mismatch.";
+
+        setCertificates((prev) =>
+          prev.map(cert => {
+            if (cert.id === certId || cert._id === certId || String(cert._id) === String(certId)) {
+              return {
+                ...cert,
+                status: 'Not Verified',
+                actionRequired: `Manual Review Required: ${errorReason}`
+              };
+            }
+            return cert;
+          })
+        );
+
+        console.log(`Validation Complete: Failed - ${errorReason}`);
+        alert(`Verification Failed: ${errorReason}`);
+      }
+    } catch (error) {
+      console.error("Validation failed:", error);
+      alert("Server error during validation.");
+    } finally {
+      // 4. Turn off the loading animation for this certificate
+      setValidatingIds((prev) => ({ ...prev, [certId]: false }));
+      handleRefresh();
     }
-  } catch (error) {
-    console.error("Validation failed:", error);
-    alert("Server error during validation.");
-  } finally {
-    // 4. Turn off the loading animation for this certificate
-    setValidatingIds((prev) => ({ ...prev, [certId]: false }));
-    handleRefresh();
-  }
-};
+  };
+
+  const handleLogout = () => {
+    // 1. Delete all user authentication data from local storage
+    localStorage.removeItem('userEmail'); 
+    // Pro-tip: If you want to wipe absolutely EVERYTHING saved locally, use: localStorage.clear();
+
+    // 2. Instantly redirect the user straight back to the home / login page
+    navigate('/'); 
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans flex flex-col">
-      
+
       <header className="flex items-center justify-between px-6 py-4 bg-blue-900 text-white shadow-xl sticky top-0 z-10">
         <h1 className="text-2xl font-extrabold tracking-wider">{organizationName}</h1>
         <nav className="flex items-center space-x-6">
           <Link to="/jobs" className="text-gray-300 hover:text-white transition hidden sm:inline">Search Jobs</Link>
-          
+
           <div className="flex items-center space-x-4 border-l border-gray-700 pl-4">
             <span className="text-sm font-medium hidden md:inline">Profile</span>
             <UserCircle className="w-6 h-6 cursor-pointer hover:text-blue-300" />
             <Bell className="w-6 h-6 cursor-pointer hover:text-blue-300" />
+            
+            {/* 🌟 THE LOGOUT BUTTON */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition duration-150 ease-in-out shadow-md ml-2"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden xs:inline">Logout</span>
+            </button>
           </div>
         </nav>
       </header>
 
       <main className="container max-w-5xl px-4 py-8 mx-auto flex-grow">
-        
+
         <h2 className="mb-8 text-2xl font-light text-gray-700">
           Hii <span className="font-semibold text-gray-900">{userName}</span>
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-          
+
           <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-200">
-          <input 
-            type = 'file'
-            ref = {fileInputRef}
-            onChange={handleFileChange}
-            className='hidden'
-            accept='.pdf'
-          />
+            <input
+              type='file'
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className='hidden'
+              accept='.pdf'
+            />
             <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-gray-800 flex items-center">
-                    <FileText className="w-6 h-6 mr-2 text-blue-600" />
-                    Resume
-                </h3>
-                <button 
-                    onClick={handleResumeUpload}
-                    className="p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition"
-                    aria-label="Upload Resume"
-                >
-                    <Upload className="w-6 h-6" />
-                </button>
+              <h3 className="text-xl font-bold text-gray-800 flex items-center">
+                <FileText className="w-6 h-6 mr-2 text-blue-600" />
+                Resume
+              </h3>
+              <button
+                onClick={handleResumeUpload}
+                className="p-2 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200 transition"
+                aria-label="Upload Resume"
+              >
+                <Upload className="w-6 h-6" />
+              </button>
             </div>
             <p className="text-sm font-medium text-gray-600">Current Resume:</p>
             <a href={resumeUrl} target="_blank" rel="noopener noreferrer">
-            <p className="text-base font-semibold text-blue-700 underline truncate">{currentResume}</p>
+              <p className="text-base font-semibold text-blue-700 underline truncate">{currentResume}</p>
             </a>
           </div>
-          
+
           <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-200">
             <h3 className="text-xl font-bold text-gray-800 mb-4">
-                Add new certificate to your profile :
+              Add new certificate to your profile :
             </h3>
             <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                <input type="file" ref={certFileInputRef} onChange={handleCertificateFileChange} className='hidden' accept='.pdf,.jpg,.jpeg,.png' />
-                <input
-                    type="text"
-                    placeholder="Browse file..."
-                    className="flex-grow p-2 text-gray-700 border-none focus:ring-0"
-                    readOnly 
-                />
-                <button
-                    onClick={handleCertificateUpload}
-                    className="p-2 bg-blue-600 text-white hover:bg-blue-700 transition"
-                    aria-label="Add Certificate"
-                >
-                    <Upload className="w-6 h-6" />
-                </button>
+              <input type="file" ref={certFileInputRef} onChange={handleCertificateFileChange} className='hidden' accept='.pdf,.jpg,.jpeg,.png' />
+              <input
+                type="text"
+                placeholder="Browse file..."
+                className="flex-grow p-2 text-gray-700 border-none focus:ring-0"
+                readOnly
+              />
+              <button
+                onClick={handleCertificateUpload}
+                className="p-2 bg-blue-600 text-white hover:bg-blue-700 transition"
+                aria-label="Add Certificate"
+              >
+                <Upload className="w-6 h-6" />
+              </button>
             </div>
           </div>
         </div>
         <p className="text-lg text-red-600 font-bold mb-4 mt-4">
-            *Pending & Not Verified Certificates will not send to recruiters at time of applying for Jobs.
+          *Pending & Not Verified Certificates will not send to recruiters at time of applying for Jobs.
         </p>
         <h3 className="mb-5 text-xl font-bold text-gray-800 border-b pb-2">
           Your Uploaded Certificates :
@@ -318,12 +395,12 @@ const handleValidateCertificate = async (certId) => {
                 </th>
               </tr>
             </thead>
-            
+
             <tbody className="bg-white divide-y divide-gray-200">
               {certificates.map((cert) => {
                 const { text, icon: StatusIcon, bgColor, borderColor } = getStatusInfo(cert.status);
                 const isVerifyActionNeeded = cert.actionRequired !== 'No Action Required';
-                
+
                 // 🆕 Determine if this row is currently loading or already finished
                 const isLoading = validatingIds[cert.id] || false;
                 const isFinished = cert.status === 'Verified' || cert.status === 'Not Verified';
@@ -350,9 +427,9 @@ const handleValidateCertificate = async (certId) => {
                     </td>
                     <td className="px-6 py-4 text-sm max-w-xs break-words whitespace-normal">
                       {isVerifyActionNeeded ? (
-                        <button 
-                          onClick={() => handleVerifyAction(cert.id, cert.fileName)}
-                          className="text-red-600 font-semibold underline hover:text-red-800 transition"
+                        <button
+                          onClick={() => handleVerifyAction(cert.id, cert.fileName, cert.status)}
+                          className="text-green-600 font-semibold underline hover:text-green-800 transition"
                         >
                           {cert.actionRequired}
                         </button>
@@ -362,16 +439,16 @@ const handleValidateCertificate = async (certId) => {
                         </span>
                       )}
                     </td>
-                    
+
                     {/* 🆕 The New Validate Button Column */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button
                         onClick={() => handleValidateCertificate(cert.id)}
                         disabled={isFinished || isLoading}
                         className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white transition-colors
-                          ${isFinished 
+                          ${isFinished
                             ? 'bg-gray-400 cursor-not-allowed' // Disabled state (Already Validated)
-                            : isLoading 
+                            : isLoading
                               ? 'bg-blue-400 cursor-not-allowed' // Disabled state (Currently Loading)
                               : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500' // Active state
                           }
@@ -384,7 +461,7 @@ const handleValidateCertificate = async (certId) => {
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
                         )}
-                        
+
                         {/* Dynamic Button Text */}
                         {isLoading ? 'Validating...' : isFinished ? 'Done' : 'Validate'}
                       </button>
@@ -398,15 +475,15 @@ const handleValidateCertificate = async (certId) => {
       </main>
 
       <footer className="w-full text-white bg-blue-900 mt-12 py-3 relative">
-          <div className="flex flex-col sm:flex-row justify-between items-center max-w-7xl mx-auto px-6">
-              <div className="py-1 text-sm text-gray-300">
-                  &copy; {organizationName} all rights reserved
-              </div>
-              
-              <div className="text-sm font-bold text-orange-400 text-shadow-md">
-                  Authenticity Meets Opportunity.
-              </div>
+        <div className="flex flex-col sm:flex-row justify-between items-center max-w-7xl mx-auto px-6">
+          <div className="py-1 text-sm text-gray-300">
+            &copy; {organizationName} all rights reserved
           </div>
+
+          <div className="text-sm font-bold text-orange-400 text-shadow-md">
+            Authenticity Meets Opportunity.
+          </div>
+        </div>
       </footer>
     </div>
   );

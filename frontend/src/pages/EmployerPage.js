@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { UserCircle, Bell, Plus, Trash2 } from 'lucide-react';
+import { UserCircle, Bell, Plus, Trash2, LogOut } from 'lucide-react';
 
 const initialJobPosts = [
   {
@@ -159,6 +159,14 @@ export default function App() {
     }
   };
 
+  const handleLogout = () => {
+    // 1. Delete all user authentication data from local storage
+    localStorage.removeItem('userEmail'); 
+    // Pro-tip: If you want to wipe absolutely EVERYTHING saved locally, use: localStorage.clear();
+
+    // 2. Instantly redirect the user straight back to the home / login page
+    navigate('/'); 
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans flex flex-col">
@@ -174,6 +182,13 @@ export default function App() {
             <span className="text-sm font-medium hidden md:inline">Profile</span>
             <UserCircle className="w-6 h-6 cursor-pointer hover:text-blue-300" />
             <Bell className="w-6 h-6 cursor-pointer hover:text-blue-300" />
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition duration-150 ease-in-out shadow-md ml-2"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden xs:inline">Logout</span>
+            </button>
           </div>
         </nav>
       </header>

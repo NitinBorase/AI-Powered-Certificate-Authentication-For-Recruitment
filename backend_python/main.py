@@ -25,6 +25,8 @@ url_extractor = URLExtract()
 
 class ValidationRequest(BaseModel):
     image_url: str
+    institution_email: str
+    pdf_url: str
 
 def fetch_image_from_url(url):
     try:
@@ -96,38 +98,63 @@ def verify_qr_and_data(data: ValidationRequest):
                 
             print(f"✅ Found URL via urlextract: {qr_url}")
     
-    if not qr_url:
-        return {"status": "NO_QR_Link", "reason": "No QR code or URL found in the certificate image.", "is_verified": False, "qr_link": None}
-    
-    # --- 3. Scrape the Verification Webpage ---
-    page_text = ""
-    try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(qr_url, wait_until="networkidle", timeout=15000)
-            page_text = page.evaluate("document.body.innerText")
-            browser.close()
-    except Exception as e:
-        return {"status": "Failed", "reason": "Could not load the verification webpage.", "is_verified": False}
+    if qr_url:
+        # --- 3. Scrape the Verification Webpage ---
+        page_text = ""
+        try:
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=True)
+                page = browser.new_page()
+                page.goto(qr_url, wait_until="networkidle", timeout=15000)
+                page_text = page.evaluate("document.body.innerText")
+                browser.close()
+        except Exception as e:
+            return {"status": "Failed", "reason": "Could not load the verification webpage.", "is_verified": False}
 
-    # --- 4. Compare the Two Texts ---
-    page_words = get_word_set(page_text)
-    matching_words = cert_words.intersection(page_words)
-    
-    # print(page_words)
-    # print(cert_words)
-    # Calculate the percentage
-    match_percentage = (len(matching_words) / len(cert_words)) * 100
-    is_verified = match_percentage >= 10.00 and qr_url is not None
+        # --- 4. Compare the Two Texts ---
+        page_words = get_word_set(page_text)
+        matching_words = cert_words.intersection(page_words)
+        
+        # print(page_words)
+        # print(cert_words)
+        # Calculate the percentage
+        match_percentage = (len(matching_words) / len(cert_words)) * 100
+        is_verified = match_percentage >= 10.00 and qr_url is not None
 
-    return {
-        "status": "Verified" if is_verified else "Data Mismatch",
-        "match_percentage": round(match_percentage, 2),
-        "matched_words_count": len(matching_words),
-        "total_cert_words": len(cert_words),
-        "reason": f"Matched {round(match_percentage, 2)}% of words between certificate and website.",
-        "is_verified": is_verified,
-        "qr_link": qr_url
-    }
+        return {
+            "status": "Verified" if is_verified else "Data Mismatch",
+            "match_percentage": round(match_percentage, 2),
+            "matched_words_count": len(matching_words),
+            "total_cert_words": len(cert_words),
+            "reason": f"Matched {round(match_percentage, 2)}% of words between certificate and website.",
+            "is_verified": is_verified,
+            "qr_link": qr_url
+        }
+    else:
+        print("🔍 Executing Path B: No links found. Forwarding URL to Node.js for clean download...")
+    
+        import requests
+        
+        # Updated endpoint that expects a JSON URL payload instead of a file
+        node_backend_url = "http://localhost:5000/api/institution/verify-pdf-url"
+        
+        payload = {
+            "email": data.institution_email,
+            "certificateUrl": data.pdf_url
+        }
+        
+        try:
+            # Fire a clean JSON POST request
+            node_response = requests.post(node_backend_url, json=payload)
+
+            node_data = node_response.json()
+
+            return node_data
+            
+        except Exception as e:
+            return {
+                "success": False,
+                "status": "Error",
+                "message": f"Failed to communicate with Node.js router: {str(e)}"
+            }
 
