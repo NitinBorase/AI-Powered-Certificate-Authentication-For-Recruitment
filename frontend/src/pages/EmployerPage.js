@@ -112,7 +112,7 @@ export default function App() {
     console.log('Posting job payload:', payload);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/jobs', payload);
+      const res = await axios.post('https://ai-powered-certificate-authentication.onrender.com/api/jobs', payload);
       console.log('POST /api/jobs response:', res);
 
       if (res.data && res.data.success) {

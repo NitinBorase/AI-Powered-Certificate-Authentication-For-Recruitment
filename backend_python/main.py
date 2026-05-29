@@ -136,7 +136,7 @@ def verify_qr_and_data(data: ValidationRequest):
         import requests
         
         # Updated endpoint that expects a JSON URL payload instead of a file
-        node_backend_url = "http://localhost:5000/api/institution/verify-pdf-url"
+        node_backend_url = "https://ai-powered-certificate-authentication.onrender.com/api/institution/verify-pdf-url"
         
         payload = {
             "email": data.institution_email,

@@ -39,7 +39,7 @@ const App = () => {
       }
 
       try {
-        const response = await axios.get(`http://localhost:5000/api/files/profile?email=${userEmail}`);
+        const response = await axios.get(`https://ai-powered-certificate-authentication.onrender.com/api/files/profile?email=${userEmail}`);
         if (response.data.success) {
           console.log("Fetched profile data:", response.data);
           setResumeUrl(response.data.user.resumeUrl || '');
@@ -146,13 +146,13 @@ const App = () => {
       const formData = new FormData();
       formData.append('certificate', file);
 
-      const uploadRes = await axios.post('http://localhost:5000/api/files/uploadCertificate', formData);
+      const uploadRes = await axios.post('https://ai-powered-certificate-authentication.onrender.com/api/files/uploadCertificate', formData);
       if (!uploadRes.data || !uploadRes.data.success) throw new Error(uploadRes.data?.message || 'Upload failed');
 
       const certificateUrl = uploadRes.data.fileUrl;
       const email = localStorage.getItem('userEmail');
 
-      const dbRes = await axios.post('http://localhost:5000/api/files/certificates/update-db', {
+      const dbRes = await axios.post('https://ai-powered-certificate-authentication.onrender.com/api/files/certificates/update-db', {
         email,
         certificateUrl,
         fileName: file.name
@@ -197,7 +197,7 @@ const App = () => {
 
     try {
       // 2. Call your backend (replace 'applicant123' with your actual dynamic ID)
-      const response = await axios.post(`http://localhost:5000/validate-qr/${userEmail}/${certId}`);
+      const response = await axios.post(`https://ai-powered-certificate-authentication.onrender.com/validate-qr/${userEmail}/${certId}`);
 
       // 3. IMPORTANT: Update your main 'certificates' state here with the new status!
       // e.g., updateCertificateStatusInState(certId, response.data.success ? 'Verified' : 'Not Verified')

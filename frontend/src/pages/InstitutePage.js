@@ -24,7 +24,7 @@ const InstitutionApp = () => {
       if (!institutionEmail) return;
 
       try {
-        const response = await axios.get(`http://localhost:5000/api/institution/profile?email=${institutionEmail}`);
+        const response = await axios.get(`https://ai-powered-certificate-authentication.onrender.com/api/institution/profile?email=${institutionEmail}`);
         
         if (response.data.success) {
           // 🌟 THIS IS THE LINE THAT POPULATES YOUR TABLE:
@@ -70,7 +70,7 @@ const InstitutionApp = () => {
       formData.append('certificate', file);
 
       // Make sure this URL matches your backend port (5000)
-      const uploadRes = await axios.post('http://localhost:5000/api/files/uploadCertificate', formData);
+      const uploadRes = await axios.post('https://ai-powered-certificate-authentication.onrender.com/api/files/uploadCertificate', formData);
       
       if (!uploadRes.data || !uploadRes.data.success) {
           throw new Error(uploadRes.data?.message || 'Cloudinary upload failed');
@@ -80,7 +80,7 @@ const InstitutionApp = () => {
       const certificateUrl = uploadRes.data.fileUrl;
       console.log("Cloudinary URL received:", certificateUrl);
 
-      const dbRes = await axios.post('http://localhost:5000/api/institution/update-certificates', {
+      const dbRes = await axios.post('https://ai-powered-certificate-authentication.onrender.com/api/institution/update-certificates', {
         email: institutionEmail, // Using the email from your component's state
         certificateUrl: certificateUrl,
         fileName: file.name
