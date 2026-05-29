@@ -18,7 +18,8 @@ import os
 app = FastAPI()
 
 print("Loading EasyOCR AI model... (This takes a few seconds)")
-reader = easyocr.Reader(['en'], gpu=False)
+# reader = easyocr.Reader(['en'], gpu=False)
+reader = None
 print("✅ EasyOCR loaded and ready!")
 
 print("Loading URLExtract...")
@@ -67,6 +68,12 @@ def clean_url(url):
 
 @app.post("/verify-qr-and-data")
 def verify_qr_and_data(data: ValidationRequest):
+    global reader
+
+    if reader is None:
+        print("Loading EasyOCR model...")
+        reader = easyocr.Reader(['en'], gpu=False)
+    
     img = fetch_image_from_url(data.image_url)
     
     # --- 1. Extract Text using EasyOCR ---
