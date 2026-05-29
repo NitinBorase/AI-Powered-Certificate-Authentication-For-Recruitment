@@ -11,10 +11,10 @@
 
 #!/usr/bin/env bash
 
-apt-get update && apt-get install -y \
-    tesseract-ocr \
-    libzbar0
+#!/usr/bin/env bash
+
+pip install --upgrade pip
 
 pip install -r requirements.txt
 
-playwright install chromium
+python -m playwright install chromium

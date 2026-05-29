@@ -11,5 +11,6 @@ urlextract
 requests
 python-multipart
 Pillow
-torch==2.7.1
-torchvision==0.22.1
+
+torch==2.2.2
+torchvision==0.17.2
