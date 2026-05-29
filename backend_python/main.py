@@ -11,8 +11,9 @@ import pytesseract
 from urlextract import URLExtract
 import os
 # pytesseract.pytesseract.tesseract_cmd = r"C:\Users\Nitin\Documents\GitHub\AI-Powered-Certificate-Authentication-For-Recruitment\tesseract.exe"
-base_dir = os.path.dirname(os.path.abspath(__file__))
-pytesseract.pytesseract.tesseract_cmd = os.path.join(base_dir, "tesseract.exe")
+# base_dir = os.path.dirname(os.path.abspath(__file__))
+# pytesseract.pytesseract.tesseract_cmd = os.path.join(base_dir, "tesseract.exe")
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 app = FastAPI()
 
