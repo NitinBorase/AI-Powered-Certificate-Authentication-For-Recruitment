@@ -4,16 +4,16 @@ import cv2
 import numpy as np
 import urllib.request
 import re 
-from pyzbar.pyzbar import decode
+# from pyzbar.pyzbar import decode
 from playwright.sync_api import sync_playwright
 import easyocr 
-import pytesseract
+# import pytesseract
 from urlextract import URLExtract
 import os
 # pytesseract.pytesseract.tesseract_cmd = r"C:\Users\Nitin\Documents\GitHub\AI-Powered-Certificate-Authentication-For-Recruitment\tesseract.exe"
 # base_dir = os.path.dirname(os.path.abspath(__file__))
 # pytesseract.pytesseract.tesseract_cmd = os.path.join(base_dir, "tesseract.exe")
-pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+# pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 app = FastAPI()
 
@@ -76,17 +76,26 @@ def verify_qr_and_data(data: ValidationRequest):
 
     cert_words = get_word_set(cert_text)
 
-    cert_text_string = pytesseract.image_to_string(img)
+    # cert_text_string = pytesseract.image_to_string(img)
+    cert_text_string = cert_text
     cert_text_string = clean_url(cert_text_string)
     if len(cert_words) == 0:
         return {"status": "Failed", "reason": "Could not read any text from the certificate image.", "is_verified": False}
 
     print(f"URL Text:", cert_text_string)
     # --- 2. Scan for QR Code and URL in certificate---
-    qr_data = decode(img)
+    # qr_data = decode(img)
+    # qr_url = None
+    # if len(qr_data) > 0:
+    #     qr_url = qr_data[0].data.decode('utf-8')
+    #     print(f"Found URL via QR Code: {qr_url}")
+    detector = cv2.QRCodeDetector()
+
     qr_url = None
-    if len(qr_data) > 0:
-        qr_url = qr_data[0].data.decode('utf-8')
+    data, bbox, _ = detector.detectAndDecode(img)
+
+    if data:
+        qr_url = data
         print(f"Found URL via QR Code: {qr_url}")
     else:
         found_urls = url_extractor.find_urls(cert_text_string)

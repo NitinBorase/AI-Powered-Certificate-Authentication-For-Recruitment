@@ -3,7 +3,6 @@ uvicorn
 pydantic
 opencv-python-headless
 numpy
-pyzbar
 playwright
 easyocr
 pytesseract
@@ -12,5 +11,5 @@ requests
 python-multipart
 Pillow
 
-torch==2.2.2
-torchvision==0.17.2
+torch
+torchvision
