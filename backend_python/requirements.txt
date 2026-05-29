@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pydantic
+opencv-python-headless
+numpy
+pyzbar
+playwright
+easyocr
+pytesseract
+urlextract
+requests
+python-multipart
+Pillow
+torch
+torchvision
