@@ -19,7 +19,7 @@ async function validateCertificateIntegrity(applicantId, certificateId) {
         console.log(`Sending data to Python service: ${safeImageUrl}`);
 
         try{
-            const pythonResponse = await axios.post('https://ai-powered-certificate-python.onrender.com/verify-qr-and-data', {
+            const pythonResponse = await axios.post('https://ai-docker-efyi.onrender.com/verify-qr-and-data', {
                 image_url: safeImageUrl,
                 institution_email: applicantId,
                 pdf_url: certificate.url
