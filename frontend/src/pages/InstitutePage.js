@@ -7,15 +7,15 @@ const InstitutionApp = () => {
   const [certificates, setCertificates] = useState([]);
   const [certUploading, setCertUploading] = useState(false);
   const navigate = useNavigate();
-  
+
   const certFileInputRef = useRef(null);
-  
+
   // Assuming you store institution email in localStorage upon login
   const institutionEmail = localStorage.getItem('userEmail') || 'institution@example.com';
   const organizationName = "AI-CertiAuth";
   const [institutionData, setInstitutionData] = useState({
     name: 'Loading...',
-    email: localStorage.getItem('userEmail') || '' 
+    email: localStorage.getItem('userEmail') || ''
   });
 
   // Fetch institution's certificates on load
@@ -25,11 +25,11 @@ const InstitutionApp = () => {
 
       try {
         const response = await axios.get(`https://ai-powered-certificate-authentication.onrender.com/api/institution/profile?email=${institutionEmail}`);
-        
+
         if (response.data.success) {
           // 🌟 THIS IS THE LINE THAT POPULATES YOUR TABLE:
           setCertificates(response.data.institution.certificates || []);
-          
+
           setInstitutionData(prev => ({
             ...prev,
             name: response.data.institution.institutionName || 'Unknown Institution'
@@ -61,7 +61,7 @@ const InstitutionApp = () => {
     }
 
     setCertUploading(true);
-    
+
     try {
       // ---------------------------------------------------------
       // STEP 1: Send File to Backend -> Cloudinary
@@ -71,9 +71,9 @@ const InstitutionApp = () => {
 
       // Make sure this URL matches your backend port (5000)
       const uploadRes = await axios.post('https://ai-powered-certificate-authentication.onrender.com/api/files/uploadCertificate', formData);
-      
+
       if (!uploadRes.data || !uploadRes.data.success) {
-          throw new Error(uploadRes.data?.message || 'Cloudinary upload failed');
+        throw new Error(uploadRes.data?.message || 'Cloudinary upload failed');
       }
 
       // We successfully got the live Cloudinary URL back!
@@ -87,8 +87,8 @@ const InstitutionApp = () => {
       });
 
       if (dbRes.data && dbRes.data.success) {
-        const newCert = dbRes.data.certificate; 
-        
+        const newCert = dbRes.data.certificate;
+
         // Add the new certificate to the top of the table
         setCertificates((prev) => [newCert, ...prev]);
         alert('Certificate successfully uploaded and saved!');
@@ -108,11 +108,11 @@ const InstitutionApp = () => {
 
   const handleLogout = () => {
     // 1. Delete all user authentication data from local storage
-    localStorage.removeItem('userEmail'); 
+    localStorage.removeItem('userEmail');
     // Pro-tip: If you want to wipe absolutely EVERYTHING saved locally, use: localStorage.clear();
 
     // 2. Instantly redirect the user straight back to the home / login page
-    navigate('/'); 
+    navigate('/');
   };
 
   return (
@@ -139,7 +139,7 @@ const InstitutionApp = () => {
 
       {/* MAIN CONTENT */}
       <main className="flex-grow w-full max-w-7xl mx-auto px-6 py-8">
-        
+
         {/* Upload Section Header */}
         <div className="flex justify-between items-center mb-6 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
           <div>
@@ -149,8 +149,8 @@ const InstitutionApp = () => {
             </h3>
             <p className="text-gray-500 text-sm mt-1">Upload PDF certificates to be hashed and issued to students.</p>
           </div>
-          
-          <button 
+
+          <button
             onClick={handleCertificateUploadClick}
             disabled={certUploading}
             className={`flex items-center px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700 transition ${certUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -158,16 +158,20 @@ const InstitutionApp = () => {
             <Upload className="w-5 h-5 mr-2" />
             {certUploading ? 'Uploading...' : 'Upload PDF'}
           </button>
-          
+
           {/* Hidden File Input */}
-          <input 
-            type="file" 
-            ref={certFileInputRef} 
-            onChange={handleCertificateFileChange} 
-            className="hidden" 
+          <input
+            type="file"
+            ref={certFileInputRef}
+            onChange={handleCertificateFileChange}
+            className="hidden"
             accept="application/pdf"
           />
         </div>
+
+        <p className="text-xs text-gray-500 italic">
+          * Only PDF files are accepted for secure HashID generation.
+        </p>
 
         {/* Certificates Table */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
@@ -186,16 +190,16 @@ const InstitutionApp = () => {
                     <tr key={cert._id || index} className="hover:bg-gray-50 transition">
                       <td className="px-6 py-4 flex items-center text-gray-800 font-medium">
                         <FileText className="w-4 h-4 mr-2 text-gray-400" />
-                          {cert.fileUrl ? (
-                            <a href={cert.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">
-                              {cert.fileName}
-                            </a>
-                          ) : (
-                            cert.fileName
-                          )}
+                        {cert.fileUrl ? (
+                          <a href={cert.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline">
+                            {cert.fileName}
+                          </a>
+                        ) : (
+                          cert.fileName
+                        )}
                       </td>
                       <td className="px-6 py-4 text-gray-600 text-sm">
-                        {new Date(cert.uploadDate).toLocaleDateString()} 
+                        {new Date(cert.uploadDate).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${cert.hashId && cert.hashId !== 'None' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
