@@ -15,6 +15,8 @@ import os
 # pytesseract.pytesseract.tesseract_cmd = os.path.join(base_dir, "tesseract.exe")
 # pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+
 app = FastAPI()
 
 # print("Loading EasyOCR AI model... (This takes a few seconds)")
