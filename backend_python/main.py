@@ -14,8 +14,10 @@ import os
 # base_dir = os.path.dirname(os.path.abspath(__file__))
 # pytesseract.pytesseract.tesseract_cmd = os.path.join(base_dir, "tesseract.exe")
 # pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
-
-pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+import shutil
+pytesseract.pytesseract.tesseract_cmd = (
+    shutil.which("tesseract") or "/usr/bin/tesseract"
+)
 
 app = FastAPI()
 
