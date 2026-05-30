@@ -169,7 +169,7 @@ const InstitutionApp = () => {
           />
         </div>
 
-        <p className="text-xs text-gray-500 italic">
+        <p className="text-sm text-gray-500 italic">
           * Only PDF files are accepted for secure HashID generation.
         </p>
 
