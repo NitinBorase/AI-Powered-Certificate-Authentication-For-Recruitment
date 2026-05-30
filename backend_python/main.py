@@ -78,7 +78,16 @@ def verify_qr_and_data(data: ValidationRequest):
     
     # --- 1. Extract Text using EasyOCR ---
     # detail=0 returns a simple list of strings instead of complex bounding box coordinates
-    text_list = reader.readtext(img, detail=0)
+    reader = None
+
+    def get_reader():
+        global reader
+        if reader is None:
+            reader = easyocr.Reader(['en'], gpu=False)
+        return reader
+
+    reader_instance = get_reader()
+    text_list = reader_instance.readtext(img, detail=0)
     cert_text = " ".join(text_list)
 
     cert_words = get_word_set(cert_text)
