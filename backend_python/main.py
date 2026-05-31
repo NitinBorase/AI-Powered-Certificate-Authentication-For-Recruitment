@@ -198,8 +198,8 @@ def verify_qr_and_data(data: ValidationRequest):
         page_words = get_word_set(page_text)
         matching_words = cert_words.intersection(page_words)
         
-        # print(page_words)
-        # print(cert_words)
+        print(page_words)
+        print(cert_words)
         # Calculate the percentage
         match_percentage = (len(matching_words) / len(cert_words)) * 100
         is_verified = match_percentage >= 10.00 and qr_url is not None
