@@ -188,11 +188,17 @@ def verify_qr_and_data(data: ValidationRequest):
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True)
                 page = browser.new_page()
-                page.goto(qr_url, wait_until="networkidle", timeout=15000)
+                page.goto(qr_url, wait_until="networkidle", timeout=60000)
                 page_text = page.evaluate("document.body.innerText")
                 browser.close()
         except Exception as e:
-            return {"status": "Failed", "reason": "Could not load the verification webpage.", "is_verified": False}
+            print("Playwright Error:", str(e))
+
+            return {
+                "status": "Failed",
+                "reason": str(e),
+                "is_verified": False
+            }
 
         # --- 4. Compare the Two Texts ---
         page_words = get_word_set(page_text)
