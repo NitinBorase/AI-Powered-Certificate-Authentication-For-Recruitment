@@ -188,7 +188,7 @@ def verify_qr_and_data(data: ValidationRequest):
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=True)
                 page = browser.new_page()
-                page.goto(qr_url, wait_until="networkidle", timeout=120000)
+                page.goto(qr_url, wait_until="networkidle", timeout=1200000)
                 page_text = page.evaluate("document.body.innerText")
                 browser.close()
         except Exception as e:
