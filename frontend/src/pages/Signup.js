@@ -190,7 +190,7 @@ const InstitutionForm = ({ setLoading, setMessage, loading }) => {
         setLoading(true);
 
         try{
-            const response = await axios.post('http://localhost:5000/api/auth/register', {
+            const response = await axios.post('https://ai-powered-certificate-authentication.onrender.com/api/auth/register', {
                 ...formData,
                 role: 'Institution',
             });
